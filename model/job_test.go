@@ -33,7 +33,7 @@ func TestJob(t *testing.T) {
 		t.Error(err)
 	}
 
-	job := &Job{WorkDir: "/tmp"}
+	job := &Job{InputData: []byte("test")}
 	err = QueueJob(db, job)
 	if err != nil {
 		t.Fatal(err)

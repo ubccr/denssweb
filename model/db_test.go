@@ -25,7 +25,7 @@ import (
 const (
 	JobSchema = `
 		create table if not exists job 
-		(id integer primary key, status_id integer, work_dir string,
+		(id integer primary key, status_id integer, input_data blob, dmax integer,
          submitted datetime, started datetime, completed datetime)
 	`
 	JobStatusSchema = `

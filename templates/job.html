@@ -1,9 +1,15 @@
 {{define "content"}}
 <div class="page-header">
-    <h1>Job</h1>
+    <h1>Job {{ .job.ID }}</h1>
 </div>
 
+{{ if eq .job.Status "Complete" }}
     <input type="hidden" value="6lyz_averaged" id="jobid" />
     <div id="app"></div>
     <script src="/static/js/LiteMol-denss.js?lmversion=11"></script>
+{{ else }}
+    <div class="alert alert-info" role="alert">
+        <strong>Pending</strong> Your job was submitted at {{ .job.Submitted.Format "15:04:05 EST on Jan 02, 2006" }}
+    </div>
+{{end}}
 {{end}}

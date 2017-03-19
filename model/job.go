@@ -25,17 +25,19 @@ import (
 )
 
 const (
-	StatusPending  = iota // 0
-	StatusRunning         // 1
-	StatusComplete        // 2
-	StatusError           // 3
+	_              = iota // 0
+	StatusPending         // 1
+	StatusRunning         // 2
+	StatusComplete        // 3
+	StatusError           // 4
 )
 
 type Job struct {
 	ID        int64      `db:"id"`
 	StatusID  int64      `db:"status_id"`
 	Status    string     `db:"status"`
-	WorkDir   string     `db:"work_dir"`
+	InputData []byte     `db:"input_data"`
+	Dmax      int        `db:"dmax"`
 	Submitted *time.Time `db:"submitted"`
 	Started   *time.Time `db:"started"`
 	Completed *time.Time `db:"completed"`
@@ -48,7 +50,8 @@ func FetchJob(db *sqlx.DB, id int64) (*Job, error) {
 			j.id,
 			j.status_id,
 			s.status,
-            j.work_dir,
+            j.input_data,
+            j.dmax,
             j.submitted,
             j.started,
             j.completed
@@ -76,11 +79,13 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 	res, err := tx.NamedExec(`
         insert into job (
             status_id,
-            work_dir,
+            input_data,
+            dmax,
             submitted
         ) values (
             :status_id,
-            :work_dir,
+            :input_data,
+            :dmax,
             :submitted)`, job)
 	if err != nil {
 		return err
@@ -107,7 +112,8 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
 			j.id,
 			j.status_id,
 			s.status,
-            j.work_dir,
+            j.input_data,
+            j.dmax,
             j.submitted,
             j.started,
             j.completed
