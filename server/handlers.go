@@ -130,12 +130,12 @@ func submitJob(ctx *AppContext, data []byte, dmax string) (*model.Job, error) {
 		return nil, errors.New("Please provide an input data file")
 	}
 
-	d, err := strconv.Atoi(dmax)
+	d, err := strconv.ParseFloat(dmax, 64)
 	if err != nil {
-		return nil, errors.New("Please an integer for the maximum particle dimension")
+		return nil, errors.New("Please a float for the maximum particle dimension")
 	}
 
-	job := &model.Job{InputData: data, Dmax: d}
+	job := &model.Job{InputData: data, Dmax: d, Name: "test"}
 
 	err = model.QueueJob(ctx.DB, job)
 	if err != nil {

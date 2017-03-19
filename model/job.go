@@ -32,17 +32,73 @@ const (
 	StatusError           // 4
 )
 
+// A DENSS Job
 type Job struct {
-	ID        int64      `db:"id"`
-	StatusID  int64      `db:"status_id"`
-	Status    string     `db:"status"`
-	InputData []byte     `db:"input_data"`
-	Dmax      int        `db:"dmax"`
+	// Unique ID for the Job
+	ID int64 `db:"id"`
+
+	// Unique Job token
+	Token string `db:"token"`
+
+	// Job Status ID
+	StatusID int64 `db:"status_id"`
+
+	// Job Status string
+	Status string `db:"status"`
+
+	// Job Name
+	Name string `db:"name"`
+
+	// Input data file (*.dat or GNOM *.out file)
+	InputData []byte `db:"input_data"`
+
+	// Resulting density map in CCP4 format
+	DensityMap []byte `db:"density_map"`
+
+	// Fourier SHell Correlation (FSC) Curve chart
+	FSCChart []byte `db:"fsc_chart"`
+
+	// A zip of the raw output from DENSS
+	RawData []byte `db:"raw_data"`
+
+	// Maximum dimension of particle
+	Dmax float64 `db:"dmax"`
+
+	// Number of samples. This represents the size of the grid in each
+	// dimension. The grid is 3D so NumSamples=31 would be 31 x 31 x 31. The
+	// grid size will determine the speed of the calculation and memory used.
+	// More samples means greater resolution. This is calculated by DENSS, it's
+	// not given to DENSS but we want to control the speed of calcuation so we
+	// use this parameter to determine the voxel size.
+	NumSamples int `db:"num_samples"`
+
+	// Oversampling size
+	Oversampling float64 `db:"oversampling"`
+
+	// Voxel Size
+	VoxelSize float64 `db:"voxel_size"`
+
+	// Number of electrons
+	Electrons int64 `db:"electrons"`
+
+	// Maximum number of steps
+	MaxSteps int64 `db:"max_steps"`
+
+	// Maximum number of times to run DENSS
+	MaxRuns int64 `db:"max_runs"`
+
+	// Time the job was submitted
 	Submitted *time.Time `db:"submitted"`
-	Started   *time.Time `db:"started"`
+
+	// Time the job started running
+	Started *time.Time `db:"started"`
+
+	// Time the job completed
 	Completed *time.Time `db:"completed"`
 }
 
+// Fetch job by id. This is used for displaying the Job status in the web
+// interface and no raw binary data is included
 func FetchJob(db *sqlx.DB, id int64) (*Job, error) {
 	job := Job{}
 	err := db.Get(&job, `
@@ -50,8 +106,16 @@ func FetchJob(db *sqlx.DB, id int64) (*Job, error) {
 			j.id,
 			j.status_id,
 			s.status,
-            j.input_data,
+            j.name,
+            j.token,
             j.dmax,
+            j.name,
+            j.oversampling,
+            j.num_samples,
+            j.voxel_size,
+            j.electrons,
+            j.max_steps,
+            j.max_runs,
             j.submitted,
             j.started,
             j.completed
@@ -65,6 +129,7 @@ func FetchJob(db *sqlx.DB, id int64) (*Job, error) {
 	return &job, nil
 }
 
+// Queue a new DENSS Job
 func QueueJob(db *sqlx.DB, job *Job) error {
 	tx, err := db.Beginx()
 	if err != nil {
@@ -76,16 +141,46 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 	now := time.Now()
 	job.Submitted = &now
 
+	if job.Dmax <= 0 {
+		job.Dmax = 50.0
+	}
+
+	// XXX In future versions these will be adjustable parameters. For now we
+	// hard code them
+	job.Token = "test"
+	job.Oversampling = 2.0
+	job.Electrons = 10000
+	job.MaxSteps = 3000
+	job.MaxRuns = 20
+	job.NumSamples = 31
+	job.VoxelSize = (job.Dmax * job.Oversampling) / float64(job.NumSamples)
+
 	res, err := tx.NamedExec(`
         insert into job (
             status_id,
             input_data,
+            name,
+            token,
             dmax,
+            num_samples,
+            oversampling,
+            electrons,
+            max_steps,
+            max_runs,
+            voxel_size,
             submitted
         ) values (
             :status_id,
             :input_data,
+            :name,
+            :token,
             :dmax,
+            :num_samples,
+            :oversampling,
+            :electrons,
+            :max_steps,
+            :max_runs,
+            :voxel_size,
             :submitted)`, job)
 	if err != nil {
 		return err
@@ -113,7 +208,15 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
 			j.status_id,
 			s.status,
             j.input_data,
+            j.name,
+            j.token,
             j.dmax,
+            j.oversampling,
+            j.num_samples,
+            j.electrons,
+            j.max_steps,
+            j.max_runs,
+            j.voxel_size,
             j.submitted,
             j.started,
             j.completed
