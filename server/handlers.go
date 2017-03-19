@@ -30,6 +30,10 @@ import (
 	"github.com/ubccr/denssweb/model"
 )
 
+const (
+	MaxFileSize = 1 << (10 * 2) // 1MB
+)
+
 func IndexHandler(ctx *AppContext) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx.RenderTemplate(w, "index.html", nil)
@@ -72,6 +76,7 @@ func SubmitHandler(ctx *AppContext) http.Handler {
 		message := ""
 
 		if r.Method == "POST" {
+			r.Body = http.MaxBytesReader(w, r.Body, MaxFileSize)
 			err := r.ParseMultipartForm(4096)
 			if err != nil {
 				log.WithFields(log.Fields{
