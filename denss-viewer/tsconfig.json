@@ -1,0 +1,23 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": false,
+    "declaration": false,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "lib": [ "es5", "es2015.collection", "dom", "es2015.promise" ],
+    "target": "es5",
+    "jsx": "react",
+    "module": "none",
+    "types": [],
+    "skipDefaultLibCheck": true,
+    "out": "../templates/static/js/LiteMol-denss.js"
+  },
+  "files": [
+    "../LiteMol/dist/js/LiteMol-plugin.d.ts",
+    "Denss.ts"
+  ]
+}

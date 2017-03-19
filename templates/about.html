@@ -1,0 +1,33 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>About DENSS</h1>
+</div>
+
+<p>
+<strong>DEN</strong>sity from <strong>S</strong>olution
+<strong>S</strong>cattering (DENSS) is an algorithm used for calculating ab
+initio electron density maps directly from solution scattering data. DENSS
+implements a novel iterative structure factor retrieval algorithm to cycle
+between real space density and reciprocal space structure factors, applying
+appropriate restraints in each domain to obtain a set of structure factors
+whose intensities are consistent with experimental data and whose electron
+density is consistent with expected real space properties of particles.
+</p>
+
+<p>
+DENSS utilizes the NumPy Fast Fourier Transform for moving between real and
+reciprocal space domains. Each domain is represented by a grid of points
+(Cartesian), N x N x N. N is determined by the size of the system and the
+desired resolution. The real space size of the box is determined by the maximum
+dimension of the particle, D, and the desired sampling ratio. Larger sampling
+ratio results in a larger real space box and therefore a higher sampling in
+reciprocal space (i.e. distance between data points in q). Smaller voxel size
+in real space corresponds to higher spatial resolution and therefore to larger
+q values in reciprocal space.
+</p>
+
+<br/>
+<br/>
+<br/>
+
+{{end}}

@@ -1,0 +1,27 @@
+body {
+    padding-top: 70px;
+    padding-bottom: 30px;
+}
+
+.footer {
+    padding-top: 19px;
+    color: #777;
+    border-top: 1px solid #e5e5e5;
+}
+
+.jumbotron {
+    text-align: center;
+    background-color: transparent;
+}
+.jumbotron .btn {
+    padding: 14px 24px;
+    font-size: 21px;
+}
+
+#app {
+    position: relative;
+    margin-top: 80px;
+    margin-bottom: 400px;
+    width: 640px;
+    height: 480px;
+}    
