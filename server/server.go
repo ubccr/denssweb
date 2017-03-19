@@ -37,6 +37,10 @@ func init() {
 func middleware(ctx *AppContext) *negroni.Negroni {
 	router := mux.NewRouter()
 
+	router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx.RenderNotFound(w)
+	})
+
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(fmt.Sprintf("%s/static", ctx.Tmpldir)))))
 	router.Path("/about").Handler(AboutHandler(ctx)).Methods("GET")
 	router.Path("/").Handler(IndexHandler(ctx)).Methods("GET")
