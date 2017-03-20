@@ -14,6 +14,7 @@ URL: <a href="{{ .job.URL }}">{{ .job.URL }}</a> {{ if eq .job.Status "Complete"
 </p>
 
 {{ if eq .job.Status "Complete" }}
+    <script src="/static/js/LiteMol-plugin.js?lmversion=14"></script>
     <div class="alert alert-success" role="alert">
         <strong>Complete</strong> Your job was completed at {{ .job.Completed.Local.Format "15:04:05 EST on Jan 02, 2006" }}
     </div>
@@ -29,18 +30,61 @@ URL: <a href="{{ .job.URL }}">{{ .job.URL }}</a> {{ if eq .job.Status "Complete"
     <input type="hidden" value="DENSS_{{ .job.ID }}" id="jobid" />
     <input type="hidden" value="{{ .job.URL }}/density-map.ccp4" id="ccp4url" />
     <div id="app"></div>
-    <script src="/static/js/LiteMol-denss.js?lmversion=11"></script>
-{{ else if eq .job.Status "Running" }}
+    <script src="/static/js/LiteMol-denss.js?lmversion=14"></script>
+{{ else if or (eq .job.Status "Running") ( eq .job.Status "Pending") }}
+    {{ if eq .job.Status "Running" }}
     <div class="alert alert-warning" role="alert">
-        <strong>Running</strong> Your job was started at {{ .job.Started.Local.Format "15:04:05 EST on Jan 02, 2006" }}
+        <strong id="status">Running</strong> Your job was started at {{ .job.Started.Local.Format "15:04:05 EST on Jan 02, 2006" }}
     </div>
+    {{ else }}
+    <div class="alert alert-info" role="alert">
+        <strong id="status">Pending</strong> Your job was submitted at {{ .job.Submitted.Local.Format "15:04:05 EST on Jan 02, 2006" }}
+    </div>
+    {{ end }}    
+    <div id="job-status">
+         <div class="progress">
+            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                <span id="pct">0% Complete</span>
+            </div>
+         </div>
+        <p id="task" class="lead">...</p>
+        <pre id="log"></pre>
+    </div>
+    <script>
+
+// XXX Perhaps we should use websockets here?
+function updateJobStatus() {
+	$.getJSON('{{ .job.URL }}/status', function(data) {
+		// update UI
+		percent = parseInt(data['percent_complete']);
+        $('.progress-bar').css('width', percent+'%').attr('aria-valuenow', percent);
+		$('#pct').text(percent + '% Complete');
+		$('#task').text(data['task']);
+        $('#log').text(data['log_message']);
+		if (data['status'] == $('#status').text()) {
+			setTimeout(function() {
+				updateJobStatus();
+			}, 2000);
+		} else {
+            // If we change status just refresh the page
+			location.reload();
+		}
+	});
+}
+
+$(function() {
+	updateJobStatus();
+});
+    </script>
 {{ else if eq .job.Status "Error" }}
     <div class="alert alert-danger" role="alert">
         <strong>Failed</strong> Your job failed at {{ .job.Completed.Local.Format "15:04:05 EST on Jan 02, 2006" }}
     </div>
+    <p id="task" class="lead">{{ .job.Task }}</p>
+    <pre id="log">{{ .job.LogMessage }}</pre>
 {{ else }}
-    <div class="alert alert-info" role="alert">
-        <strong>Pending</strong> Your job was submitted at {{ .job.Submitted.Local.Format "15:04:05 EST on Jan 02, 2006" }}
+    <div class="alert alert-danger" role="alert">
+        No Job data found
     </div>
 {{end}}
 {{end}}

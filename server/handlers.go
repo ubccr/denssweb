@@ -21,6 +21,7 @@ import (
 	"bufio"
 	"bytes"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -268,5 +269,39 @@ func RawDataHandler(ctx *app.AppContext) http.Handler {
 		}
 
 		ctx.RenderNotFound(w)
+	})
+}
+
+func StatusHandler(ctx *app.AppContext) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := mux.Vars(r)["id"]
+		job, err := model.FetchJob(ctx.DB, id)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"error": err.Error(),
+				"id":    id,
+			}).Error("Failed to fetch job from database")
+
+			if err == sql.ErrNoRows {
+				ctx.RenderNotFound(w)
+			} else {
+				ctx.RenderError(w, http.StatusInternalServerError)
+			}
+
+			return
+		}
+
+		out, err := json.Marshal(job)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"error": err.Error(),
+				"id":    job.ID,
+			}).Error("Error encoding job as json")
+			ctx.RenderError(w, http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(out)
 	})
 }

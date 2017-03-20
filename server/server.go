@@ -48,6 +48,7 @@ func middleware(ctx *app.AppContext) *negroni.Negroni {
 	router.Path("/about").Handler(AboutHandler(ctx)).Methods("GET")
 	router.Path("/submit").Handler(SubmitHandler(ctx)).Methods("GET", "POST")
 	router.Path(fmt.Sprintf("/job/{id:%s}", TokenRegex)).Handler(JobHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}/status", TokenRegex)).Handler(StatusHandler(ctx)).Methods("GET")
 	router.Path(fmt.Sprintf("/job/{id:%s}/density-map.ccp4", TokenRegex)).Handler(DensityMapHandler(ctx)).Methods("GET")
 	router.Path(fmt.Sprintf("/job/{id:%s}/fsc.png", TokenRegex)).Handler(FSCChartHandler(ctx)).Methods("GET")
 	router.Path(fmt.Sprintf("/job/{id:%s}/raw-data.zip", TokenRegex)).Handler(RawDataHandler(ctx)).Methods("GET")
