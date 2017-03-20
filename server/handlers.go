@@ -115,7 +115,7 @@ func SubmitHandler(ctx *app.AppContext) http.Handler {
 			job, err := submitJob(ctx, inputData, r.FormValue("dmax"), r.FormValue("name"))
 
 			if err == nil {
-                http.Redirect(w, r, job.URL(), 302)
+				http.Redirect(w, r, job.URL(), 302)
 				return
 			}
 

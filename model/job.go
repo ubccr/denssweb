@@ -108,7 +108,7 @@ func (j *Job) URL() string {
 // interface and no raw binary data is included
 func FetchJob(db *sqlx.DB, token string) (*Job, error) {
 	job := Job{}
-    err := db.Get(&job, `
+	err := db.Get(&job, `
 		select
 			j.id,
 			j.status_id,
@@ -282,7 +282,7 @@ func CompleteJob(db *sqlx.DB, job *Job, statusID int) error {
 // Fetch job density map by token.
 func FetchDensityMap(db *sqlx.DB, token string) (*Job, error) {
 	job := Job{}
-    err := db.Get(&job, `
+	err := db.Get(&job, `
 		select
 			j.id,
 			j.status_id,
@@ -303,7 +303,7 @@ func FetchDensityMap(db *sqlx.DB, token string) (*Job, error) {
 // Fetch job fsc chart by token.
 func FetchFSCChart(db *sqlx.DB, token string) (*Job, error) {
 	job := Job{}
-    err := db.Get(&job, `
+	err := db.Get(&job, `
 		select
 			j.id,
 			j.status_id,
@@ -324,7 +324,7 @@ func FetchFSCChart(db *sqlx.DB, token string) (*Job, error) {
 // Fetch job raw data by token.
 func FetchRawData(db *sqlx.DB, token string) (*Job, error) {
 	job := Job{}
-    err := db.Get(&job, `
+	err := db.Get(&job, `
 		select
 			j.id,
 			j.status_id,
@@ -346,5 +346,5 @@ func FetchRawData(db *sqlx.DB, token string) (*Job, error) {
 func randToken() string {
 	b := make([]byte, 9)
 	rand.Read(b)
-    return base64.RawURLEncoding.EncodeToString(b)
+	return base64.RawURLEncoding.EncodeToString(b)
 }
