@@ -20,7 +20,6 @@ package server
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -48,9 +47,8 @@ func AboutHandler(ctx *AppContext) http.Handler {
 
 func JobHandler(ctx *AppContext) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, _ := strconv.Atoi(mux.Vars(r)["id"])
-
-		job, err := model.FetchJob(ctx.DB, int64(id))
+		id := mux.Vars(r)["id"]
+		job, err := model.FetchJob(ctx.DB, id)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"error": err.Error(),
@@ -65,7 +63,18 @@ func JobHandler(ctx *AppContext) http.Handler {
 
 			return
 		}
+
+		jurl, err := job.URL()
+		if err != nil {
+			log.WithFields(log.Fields{
+				"err": err,
+			}).Error("Failed to generate job URL")
+			ctx.RenderError(w, http.StatusInternalServerError)
+			return
+		}
+
 		vars := map[string]interface{}{
+			"url": jurl,
 			"job": job}
 		ctx.RenderTemplate(w, "job.html", vars)
 	})
@@ -111,7 +120,15 @@ func SubmitHandler(ctx *AppContext) http.Handler {
 			job, err := submitJob(ctx, inputData, r.FormValue("dmax"))
 
 			if err == nil {
-				http.Redirect(w, r, fmt.Sprintf("/job/%d", job.ID), 302)
+				jurl, err := job.URL()
+				if err != nil {
+					log.WithFields(log.Fields{
+						"err": err,
+					}).Error("Failed to generate job URL")
+					ctx.RenderError(w, http.StatusInternalServerError)
+				} else {
+					http.Redirect(w, r, jurl, 302)
+				}
 				return
 			}
 

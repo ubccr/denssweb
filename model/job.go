@@ -18,10 +18,14 @@
 package model
 
 import (
+	"crypto/rand"
+	"encoding/base64"
+	"encoding/hex"
+	"fmt"
 	"time"
 
-	//log "github.com/Sirupsen/logrus"
 	"github.com/jmoiron/sqlx"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -97,11 +101,25 @@ type Job struct {
 	Completed *time.Time `db:"completed"`
 }
 
-// Fetch job by id. This is used for displaying the Job status in the web
+func (j *Job) URL() (string, error) {
+	b, err := hex.DecodeString(j.Token)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s/job/%s", viper.GetString("base_url"), base64.RawURLEncoding.EncodeToString(b)), nil
+}
+
+// Fetch job by token. This is used for displaying the Job status in the web
 // interface and no raw binary data is included
-func FetchJob(db *sqlx.DB, id int64) (*Job, error) {
+func FetchJob(db *sqlx.DB, b64Token string) (*Job, error) {
+	token, err := base64.RawURLEncoding.DecodeString(b64Token)
+	if err != nil {
+		return nil, err
+	}
+
 	job := Job{}
-	err := db.Get(&job, `
+	err = db.Get(&job, `
 		select
 			j.id,
 			j.status_id,
@@ -121,7 +139,7 @@ func FetchJob(db *sqlx.DB, id int64) (*Job, error) {
             j.completed
         from job as j 
         join job_status s on s.id = j.status_id
-        where j.id = ?`, id)
+        where j.token = ?`, fmt.Sprintf("%x", token))
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +165,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 
 	// XXX In future versions these will be adjustable parameters. For now we
 	// hard code them
-	job.Token = "test"
+	job.Token = randToken()
 	job.Oversampling = 2.0
 	job.Electrons = 10000
 	job.MaxSteps = 3000
@@ -194,6 +212,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 	return nil
 }
 
+// Fetch next job in pending status, update status to running and return job
 func FetchNextPending(db *sqlx.DB) (*Job, error) {
 	tx, err := db.Beginx()
 	if err != nil {
@@ -242,4 +261,11 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
 	}
 
 	return &job, nil
+}
+
+// Generate random tokens
+func randToken() string {
+	b := make([]byte, 9)
+	rand.Read(b)
+	return fmt.Sprintf("%x", b)
 }

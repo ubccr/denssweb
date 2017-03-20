@@ -28,7 +28,7 @@ func TestJob(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = FetchJob(db, 1)
+	_, err = FetchJob(db, "123ab")
 	if err != sql.ErrNoRows {
 		t.Error(err)
 	}
@@ -39,7 +39,7 @@ func TestJob(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	jobx, err := FetchJob(db, job.ID)
+	jobx, err := FetchJob(db, job.Token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func TestJob(t *testing.T) {
 		t.Errorf("Incorrect job ID: got %d should be %d", jobx.ID, job.ID)
 	}
 
-	jobx, err = FetchJob(db, job.ID)
+	jobx, err = FetchJob(db, job.Token)
 	if err != nil {
 		t.Fatal(err)
 	}

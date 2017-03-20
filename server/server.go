@@ -44,7 +44,7 @@ func middleware(ctx *AppContext) *negroni.Negroni {
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(fmt.Sprintf("%s/static", ctx.Tmpldir)))))
 	router.Path("/about").Handler(AboutHandler(ctx)).Methods("GET")
 	router.Path("/submit").Handler(SubmitHandler(ctx)).Methods("GET", "POST")
-	router.Path("/job/{id:[0-9]+}").Handler(JobHandler(ctx)).Methods("GET")
+	router.Path(`/job/{id:[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\-\_]+}`).Handler(JobHandler(ctx)).Methods("GET")
 	router.Path("/").Handler(IndexHandler(ctx)).Methods("GET")
 
 	n := negroni.New(negroni.NewRecovery())

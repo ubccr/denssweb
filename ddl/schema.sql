@@ -18,7 +18,8 @@ CREATE TABLE `job` (
     `submitted`      datetime          NULL,
     `started`        datetime          NULL,
     `completed`      datetime          NULL,
-    PRIMARY KEY      (`id`)
+    PRIMARY KEY      (`id`),
+    UNIQUE           (`token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `job_status`;
