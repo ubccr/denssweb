@@ -122,7 +122,7 @@ func SubmitHandler(ctx *app.AppContext) http.Handler {
 				}
 			}
 
-			job, err := submitJob(ctx, inputData, r.FormValue("dmax"))
+			job, err := submitJob(ctx, inputData, r.FormValue("dmax"), r.FormValue("name"))
 
 			if err == nil {
 				jurl, err := job.URL()
@@ -147,17 +147,18 @@ func SubmitHandler(ctx *app.AppContext) http.Handler {
 	})
 }
 
-func submitJob(ctx *app.AppContext, data []byte, dmax string) (*model.Job, error) {
+func submitJob(ctx *app.AppContext, data []byte, dmax, name string) (*model.Job, error) {
 	if len(data) == 0 {
 		return nil, errors.New("Please provide an input data file")
 	}
 
 	d, err := strconv.ParseFloat(dmax, 64)
 	if err != nil {
-		return nil, errors.New("Please a float for the maximum particle dimension")
+		return nil, errors.New("Please provide a float for the maximum particle dimension")
 	}
 
 	// Validate input file
+	// TODO add GNOM support
 	contentType := http.DetectContentType(data)
 	if !strings.HasPrefix(contentType, "text/plain") {
 		log.WithFields(log.Fields{
@@ -184,7 +185,11 @@ func submitJob(ctx *app.AppContext, data []byte, dmax string) (*model.Job, error
 		}
 	}
 
-	job := &model.Job{InputData: data, Dmax: d, Name: "test"}
+	if len(name) > 255 {
+		return nil, errors.New("Job name must be less than 255 characters")
+	}
+
+	job := &model.Job{InputData: data, Dmax: d, Name: name}
 
 	err = model.QueueJob(ctx.DB, job)
 	if err != nil {
