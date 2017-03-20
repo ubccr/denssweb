@@ -24,17 +24,20 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
+	"github.com/ubccr/denssweb/app"
 	"github.com/urfave/negroni"
+)
+
+const (
+	TokenRegex = `[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\-\_]+`
 )
 
 func init() {
 	viper.SetDefault("port", 8080)
 	viper.SetDefault("bind", "")
-	viper.SetDefault("driver", "mysql")
-	viper.SetDefault("dsn", "/denssweb?parseTime=true")
 }
 
-func middleware(ctx *AppContext) *negroni.Negroni {
+func middleware(ctx *app.AppContext) *negroni.Negroni {
 	router := mux.NewRouter()
 
 	router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +47,10 @@ func middleware(ctx *AppContext) *negroni.Negroni {
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(fmt.Sprintf("%s/static", ctx.Tmpldir)))))
 	router.Path("/about").Handler(AboutHandler(ctx)).Methods("GET")
 	router.Path("/submit").Handler(SubmitHandler(ctx)).Methods("GET", "POST")
-	router.Path(`/job/{id:[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\-\_]+}`).Handler(JobHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}", TokenRegex)).Handler(JobHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}/density-map.ccp4", TokenRegex)).Handler(DensityMapHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}/fsc.png", TokenRegex)).Handler(FSCChartHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}/raw-data.zip", TokenRegex)).Handler(RawDataHandler(ctx)).Methods("GET")
 	router.Path("/").Handler(IndexHandler(ctx)).Methods("GET")
 
 	n := negroni.New(negroni.NewRecovery())
@@ -54,7 +60,7 @@ func middleware(ctx *AppContext) *negroni.Negroni {
 }
 
 func RunServer() {
-	ctx, err := NewAppContext()
+	ctx, err := app.NewAppContext()
 	if err != nil {
 		log.Fatal(err.Error())
 	}

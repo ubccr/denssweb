@@ -22,6 +22,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/ubccr/denssweb/client"
 	"github.com/ubccr/denssweb/server"
 	"github.com/urfave/cli"
 )
@@ -85,6 +86,13 @@ func main() {
 			Usage: "Run http server",
 			Action: func(c *cli.Context) {
 				server.RunServer()
+			},
+		},
+		{
+			Name:  "client",
+			Usage: "Run client worker",
+			Action: func(c *cli.Context) {
+				client.RunClient()
 			},
 		}}
 

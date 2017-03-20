@@ -26,6 +26,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
+	"github.com/ubccr/denssweb/app"
 	"github.com/ubccr/denssweb/model"
 )
 
@@ -33,19 +34,19 @@ const (
 	MaxFileSize = 1 << (10 * 2) // 1MB
 )
 
-func IndexHandler(ctx *AppContext) http.Handler {
+func IndexHandler(ctx *app.AppContext) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx.RenderTemplate(w, "index.html", nil)
 	})
 }
 
-func AboutHandler(ctx *AppContext) http.Handler {
+func AboutHandler(ctx *app.AppContext) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx.RenderTemplate(w, "about.html", nil)
 	})
 }
 
-func JobHandler(ctx *AppContext) http.Handler {
+func JobHandler(ctx *app.AppContext) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := mux.Vars(r)["id"]
 		job, err := model.FetchJob(ctx.DB, id)
@@ -80,7 +81,7 @@ func JobHandler(ctx *AppContext) http.Handler {
 	})
 }
 
-func SubmitHandler(ctx *AppContext) http.Handler {
+func SubmitHandler(ctx *app.AppContext) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		message := ""
 
@@ -142,7 +143,7 @@ func SubmitHandler(ctx *AppContext) http.Handler {
 	})
 }
 
-func submitJob(ctx *AppContext, data []byte, dmax string) (*model.Job, error) {
+func submitJob(ctx *app.AppContext, data []byte, dmax string) (*model.Job, error) {
 	if len(data) == 0 {
 		return nil, errors.New("Please provide an input data file")
 	}
@@ -163,4 +164,91 @@ func submitJob(ctx *AppContext, data []byte, dmax string) (*model.Job, error) {
 	}
 
 	return job, nil
+}
+
+func DensityMapHandler(ctx *app.AppContext) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := mux.Vars(r)["id"]
+		job, err := model.FetchDensityMap(ctx.DB, id)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"error": err.Error(),
+				"id":    id,
+			}).Error("Failed to fetch job from database")
+
+			if err == sql.ErrNoRows {
+				ctx.RenderNotFound(w)
+			} else {
+				ctx.RenderError(w, http.StatusInternalServerError)
+			}
+
+			return
+		}
+
+		if job.DensityMap != nil {
+			w.Header().Set("Content-Type", "application/octet-stream")
+			w.Write(job.DensityMap)
+			return
+		}
+
+		ctx.RenderNotFound(w)
+	})
+}
+
+func FSCChartHandler(ctx *app.AppContext) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := mux.Vars(r)["id"]
+		job, err := model.FetchFSCChart(ctx.DB, id)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"error": err.Error(),
+				"id":    id,
+			}).Error("Failed to fetch job from database")
+
+			if err == sql.ErrNoRows {
+				ctx.RenderNotFound(w)
+			} else {
+				ctx.RenderError(w, http.StatusInternalServerError)
+			}
+
+			return
+		}
+
+		if job.FSCChart != nil {
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(job.FSCChart)
+			return
+		}
+
+		ctx.RenderNotFound(w)
+	})
+}
+
+func RawDataHandler(ctx *app.AppContext) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := mux.Vars(r)["id"]
+		job, err := model.FetchRawData(ctx.DB, id)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"error": err.Error(),
+				"id":    id,
+			}).Error("Failed to fetch job from database")
+
+			if err == sql.ErrNoRows {
+				ctx.RenderNotFound(w)
+			} else {
+				ctx.RenderError(w, http.StatusInternalServerError)
+			}
+
+			return
+		}
+
+		if job.RawData != nil {
+			w.Header().Set("Content-Type", "application/zip")
+			w.Write(job.RawData)
+			return
+		}
+
+		ctx.RenderNotFound(w)
+	})
 }

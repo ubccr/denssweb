@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with DENSSWeb.  If not, see <http://www.gnu.org/licenses/>.
 
-package server
+package app
 
 import (
 	"bytes"
@@ -30,6 +30,11 @@ import (
 	"github.com/spf13/viper"
 	"github.com/ubccr/denssweb/model"
 )
+
+func init() {
+	viper.SetDefault("driver", "mysql")
+	viper.SetDefault("dsn", "/denssweb?parseTime=true")
+}
 
 type AppContext struct {
 	DB        *sqlx.DB

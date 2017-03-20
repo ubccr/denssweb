@@ -298,6 +298,84 @@ func CompleteJob(db *sqlx.DB, job *Job, statusID int) error {
 	return nil
 }
 
+// Fetch job density map by token.
+func FetchDensityMap(db *sqlx.DB, b64Token string) (*Job, error) {
+	token, err := base64.RawURLEncoding.DecodeString(b64Token)
+	if err != nil {
+		return nil, err
+	}
+
+	job := Job{}
+	err = db.Get(&job, `
+		select
+			j.id,
+			j.status_id,
+            j.name,
+            j.density_map,
+            j.submitted,
+            j.started,
+            j.completed
+        from job as j 
+        where j.token = ?`, fmt.Sprintf("%x", token))
+	if err != nil {
+		return nil, err
+	}
+
+	return &job, nil
+}
+
+// Fetch job fsc chart by token.
+func FetchFSCChart(db *sqlx.DB, b64Token string) (*Job, error) {
+	token, err := base64.RawURLEncoding.DecodeString(b64Token)
+	if err != nil {
+		return nil, err
+	}
+
+	job := Job{}
+	err = db.Get(&job, `
+		select
+			j.id,
+			j.status_id,
+            j.name,
+            j.fsc_chart,
+            j.submitted,
+            j.started,
+            j.completed
+        from job as j 
+        where j.token = ?`, fmt.Sprintf("%x", token))
+	if err != nil {
+		return nil, err
+	}
+
+	return &job, nil
+}
+
+// Fetch job raw data by token.
+func FetchRawData(db *sqlx.DB, b64Token string) (*Job, error) {
+	token, err := base64.RawURLEncoding.DecodeString(b64Token)
+	if err != nil {
+		return nil, err
+	}
+
+	job := Job{}
+	err = db.Get(&job, `
+		select
+			j.id,
+			j.status_id,
+            j.name,
+            j.raw_data,
+            j.submitted,
+            j.started,
+            j.completed
+        from job as j 
+        where j.token = ?`, fmt.Sprintf("%x", token))
+	if err != nil {
+		return nil, err
+	}
+
+	return &job, nil
+}
+
 // Generate random tokens
 func randToken() string {
 	b := make([]byte, 9)

@@ -22,7 +22,7 @@ namespace LiteMol.Denss {
     import Transformer = Bootstrap.Entity.Transformer;
 
 	// Download denss output as CCP4 and load the surface maps
-    async function loadMap(plugin: Plugin.Controller, id: string) {
+    async function loadMap(plugin: Plugin.Controller, id: string, ccp4url: string) {
         let action = plugin.createTransform();
 
         let groupRef = Bootstrap.Utils.generateUUID();       
@@ -30,7 +30,7 @@ namespace LiteMol.Denss {
 
         // Download binary density data in CCP4 format
         let denss = group
-            .then(Transformer.Data.Download, { url: `http://denss.ccr.buffalo.edu:8080/${id}.ccp4`, type: 'Binary', id })
+            .then(Transformer.Data.Download, { url: ccp4url, type: 'Binary' })
             .then(Transformer.Density.ParseData, { format: LiteMol.Core.Formats.Density.SupportedFormats.CCP4, id: id}, { isBinding: true, ref: 'denss-data' })
 
 		// Create 4 surface visuals with default styles
@@ -73,6 +73,9 @@ namespace LiteMol.Denss {
         
     // Grab job ID from HTML element
     let id = (((document.getElementById('jobid') as HTMLInputElement).value) || '').trim();
+    
+    // Grab CCP4 data URL from HTML element
+    let ccp4url = (((document.getElementById('ccp4url') as HTMLInputElement).value) || '').trim();
 
 	// Create LiteMol plugin
     let plugin = Plugin.create({
@@ -86,5 +89,5 @@ namespace LiteMol.Denss {
         allowAnalytics: false  
     });
 
-    loadMap(plugin, id)
+    loadMap(plugin, id, ccp4url)
 }

@@ -57,7 +57,7 @@ var LiteMol;
         var Bootstrap = LiteMol.Bootstrap;
         var Transformer = Bootstrap.Entity.Transformer;
         // Download denss output as CCP4 and load the surface maps
-        function loadMap(plugin, id) {
+        function loadMap(plugin, id, ccp4url) {
             return __awaiter(this, void 0, void 0, function () {
                 var action, groupRef, group, denss, i, data, maxSigma, colors, scale, alpha, i, surface, sstyle;
                 return __generator(this, function (_a) {
@@ -67,7 +67,7 @@ var LiteMol;
                             groupRef = Bootstrap.Utils.generateUUID();
                             group = action.add(plugin.context.tree.root, Transformer.Basic.CreateGroup, { label: id, description: 'DENSS' }, { ref: groupRef });
                             denss = group
-                                .then(Transformer.Data.Download, { url: "http://denss.ccr.buffalo.edu:8080/" + id + ".ccp4", type: 'Binary', id: id })
+                                .then(Transformer.Data.Download, { url: ccp4url, type: 'Binary' })
                                 .then(Transformer.Density.ParseData, { format: LiteMol.Core.Formats.Density.SupportedFormats.CCP4, id: id }, { isBinding: true, ref: 'denss-data' });
                             // Create 4 surface visuals with default styles
                             for (i = 1; i < 5; i++) {
@@ -112,6 +112,8 @@ var LiteMol;
         }
         // Grab job ID from HTML element
         var id = ((document.getElementById('jobid').value) || '').trim();
+        // Grab CCP4 data URL from HTML element
+        var ccp4url = ((document.getElementById('ccp4url').value) || '').trim();
         // Create LiteMol plugin
         var plugin = Plugin.create({
             target: '#app',
@@ -122,6 +124,6 @@ var LiteMol;
             // XXX Enable this in production
             allowAnalytics: false
         });
-        loadMap(plugin, id);
+        loadMap(plugin, id, ccp4url);
     })(Denss = LiteMol.Denss || (LiteMol.Denss = {}));
 })(LiteMol || (LiteMol = {}));
