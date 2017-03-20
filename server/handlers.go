@@ -69,17 +69,7 @@ func JobHandler(ctx *app.AppContext) http.Handler {
 			return
 		}
 
-		jurl, err := job.URL()
-		if err != nil {
-			log.WithFields(log.Fields{
-				"err": err,
-			}).Error("Failed to generate job URL")
-			ctx.RenderError(w, http.StatusInternalServerError)
-			return
-		}
-
 		vars := map[string]interface{}{
-			"url": jurl,
 			"job": job}
 		ctx.RenderTemplate(w, "job.html", vars)
 	})
@@ -125,15 +115,7 @@ func SubmitHandler(ctx *app.AppContext) http.Handler {
 			job, err := submitJob(ctx, inputData, r.FormValue("dmax"), r.FormValue("name"))
 
 			if err == nil {
-				jurl, err := job.URL()
-				if err != nil {
-					log.WithFields(log.Fields{
-						"err": err,
-					}).Error("Failed to generate job URL")
-					ctx.RenderError(w, http.StatusInternalServerError)
-				} else {
-					http.Redirect(w, r, jurl, 302)
-				}
+                http.Redirect(w, r, job.URL(), 302)
 				return
 			}
 

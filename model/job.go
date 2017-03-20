@@ -20,7 +20,6 @@ package model
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"time"
 
@@ -101,33 +100,15 @@ type Job struct {
 	Completed *time.Time `db:"completed"`
 }
 
-func (j *Job) b64Token() (string, error) {
-	b, err := hex.DecodeString(j.Token)
-	if err != nil {
-		return "", err
-	}
-
-	return base64.RawURLEncoding.EncodeToString(b), nil
-}
-
-func (j *Job) URL() (string, error) {
-	b64Token, err := j.b64Token()
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%s/job/%s", viper.GetString("base_url"), b64Token), nil
+func (j *Job) URL() string {
+	return fmt.Sprintf("%s/job/%s", viper.GetString("base_url"), j.Token)
 }
 
 // Fetch job by token. This is used for displaying the Job status in the web
 // interface and no raw binary data is included
-func FetchJob(db *sqlx.DB, b64Token string) (*Job, error) {
-	token, err := base64.RawURLEncoding.DecodeString(b64Token)
-	if err != nil {
-		return nil, err
-	}
-
+func FetchJob(db *sqlx.DB, token string) (*Job, error) {
 	job := Job{}
-	err = db.Get(&job, `
+    err := db.Get(&job, `
 		select
 			j.id,
 			j.status_id,
@@ -147,7 +128,7 @@ func FetchJob(db *sqlx.DB, b64Token string) (*Job, error) {
             j.completed
         from job as j 
         join job_status s on s.id = j.status_id
-        where j.token = ?`, fmt.Sprintf("%x", token))
+        where j.token = ?`, token)
 	if err != nil {
 		return nil, err
 	}
@@ -299,14 +280,9 @@ func CompleteJob(db *sqlx.DB, job *Job, statusID int) error {
 }
 
 // Fetch job density map by token.
-func FetchDensityMap(db *sqlx.DB, b64Token string) (*Job, error) {
-	token, err := base64.RawURLEncoding.DecodeString(b64Token)
-	if err != nil {
-		return nil, err
-	}
-
+func FetchDensityMap(db *sqlx.DB, token string) (*Job, error) {
 	job := Job{}
-	err = db.Get(&job, `
+    err := db.Get(&job, `
 		select
 			j.id,
 			j.status_id,
@@ -316,7 +292,7 @@ func FetchDensityMap(db *sqlx.DB, b64Token string) (*Job, error) {
             j.started,
             j.completed
         from job as j 
-        where j.token = ?`, fmt.Sprintf("%x", token))
+        where j.token = ?`, token)
 	if err != nil {
 		return nil, err
 	}
@@ -325,14 +301,9 @@ func FetchDensityMap(db *sqlx.DB, b64Token string) (*Job, error) {
 }
 
 // Fetch job fsc chart by token.
-func FetchFSCChart(db *sqlx.DB, b64Token string) (*Job, error) {
-	token, err := base64.RawURLEncoding.DecodeString(b64Token)
-	if err != nil {
-		return nil, err
-	}
-
+func FetchFSCChart(db *sqlx.DB, token string) (*Job, error) {
 	job := Job{}
-	err = db.Get(&job, `
+    err := db.Get(&job, `
 		select
 			j.id,
 			j.status_id,
@@ -342,7 +313,7 @@ func FetchFSCChart(db *sqlx.DB, b64Token string) (*Job, error) {
             j.started,
             j.completed
         from job as j 
-        where j.token = ?`, fmt.Sprintf("%x", token))
+        where j.token = ?`, token)
 	if err != nil {
 		return nil, err
 	}
@@ -351,14 +322,9 @@ func FetchFSCChart(db *sqlx.DB, b64Token string) (*Job, error) {
 }
 
 // Fetch job raw data by token.
-func FetchRawData(db *sqlx.DB, b64Token string) (*Job, error) {
-	token, err := base64.RawURLEncoding.DecodeString(b64Token)
-	if err != nil {
-		return nil, err
-	}
-
+func FetchRawData(db *sqlx.DB, token string) (*Job, error) {
 	job := Job{}
-	err = db.Get(&job, `
+    err := db.Get(&job, `
 		select
 			j.id,
 			j.status_id,
@@ -368,7 +334,7 @@ func FetchRawData(db *sqlx.DB, b64Token string) (*Job, error) {
             j.started,
             j.completed
         from job as j 
-        where j.token = ?`, fmt.Sprintf("%x", token))
+        where j.token = ?`, token)
 	if err != nil {
 		return nil, err
 	}
@@ -380,5 +346,5 @@ func FetchRawData(db *sqlx.DB, b64Token string) (*Job, error) {
 func randToken() string {
 	b := make([]byte, 9)
 	rand.Read(b)
-	return fmt.Sprintf("%x", b)
+    return base64.RawURLEncoding.EncodeToString(b)
 }

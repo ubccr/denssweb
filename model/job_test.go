@@ -39,12 +39,7 @@ func TestJob(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	b64Token, err := job.b64Token()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	jobx, err := FetchJob(db, b64Token)
+	jobx, err := FetchJob(db, job.Token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +57,7 @@ func TestJob(t *testing.T) {
 		t.Errorf("Incorrect job ID: got %d should be %d", jobx.ID, job.ID)
 	}
 
-	jobx, err = FetchJob(db, b64Token)
+	jobx, err = FetchJob(db, job.Token)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -56,6 +56,5 @@ func RunClient() {
 		log.Fatal(err.Error())
 	}
 
-	url, _ := job.URL()
-	log.Printf(url)
+	log.Printf(job.URL())
 }

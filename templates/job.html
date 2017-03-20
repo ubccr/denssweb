@@ -10,7 +10,7 @@
 </div>
 
 <p>
-URL: <a href="{{ .url }}">{{ .url }}</a> {{ if eq .job.Status "Complete" }}| Download Results: <a href="{{ .url }}/raw-data.zip">raw-data.zip</a>  {{ end }}
+URL: <a href="{{ .job.URL }}">{{ .job.URL }}</a> {{ if eq .job.Status "Complete" }}| Download Results: <a href="{{ .job.URL }}/raw-data.zip">raw-data.zip</a>  {{ end }}
 </p>
 
 {{ if eq .job.Status "Complete" }}
@@ -20,14 +20,14 @@ URL: <a href="{{ .url }}">{{ .url }}</a> {{ if eq .job.Status "Complete" }}| Dow
     <div class="page-header">Fourier Shell Correlation (FSC) curve</div>
     <div class="row">
         <div class="col-xs-6 col-sm-6 col-md-6">
-            <a href="{{ .url }}/fsc.png" class="thumbnail">
-            <img src="{{ .url }}/fsc.png" alt="FSC">
+            <a href="{{ .job.URL }}/fsc.png" class="thumbnail">
+            <img src="{{ .job.URL }}/fsc.png" alt="FSC">
             </a>
         </div>
     </div>
     <div class="page-header">Electron Density Map</div>
     <input type="hidden" value="DENSS_{{ .job.ID }}" id="jobid" />
-    <input type="hidden" value="{{ .url }}/density-map.ccp4" id="ccp4url" />
+    <input type="hidden" value="{{ .job.URL }}/density-map.ccp4" id="ccp4url" />
     <div id="app"></div>
     <script src="/static/js/LiteMol-denss.js?lmversion=11"></script>
 {{ else if eq .job.Status "Running" }}
