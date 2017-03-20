@@ -18,12 +18,135 @@
 package client
 
 import (
+	"context"
+	"fmt"
 	"io/ioutil"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"sync"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/spf13/viper"
 	"github.com/ubccr/denssweb/app"
 	"github.com/ubccr/denssweb/model"
 )
+
+const (
+	// Maxium number of seconds to run a command
+	MaxSeconds = 3600
+)
+
+func init() {
+	viper.SetDefault("work_dir", "/tmp")
+	viper.SetDefault("denss_path", "/usr/local/bin/denss.py")
+}
+
+func execDenss(job *model.Job, workDir, inputFile string, thread int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), MaxSeconds*time.Second)
+	defer cancel()
+
+	outputPrefix := filepath.Join(workDir, fmt.Sprintf("output_%d", thread))
+	args := []string{
+		"-f",
+		inputFile,
+		"-d",
+		fmt.Sprintf("%.4f", job.Dmax),
+		"--oversampling",
+		fmt.Sprintf("%.4f", job.Oversampling),
+		"--voxel",
+		fmt.Sprintf("%.4f", job.VoxelSize),
+		"-o",
+		outputPrefix,
+		"--plot-off",
+	}
+	log.Infof("Starting denss thread %d for job %d", thread, job.ID)
+	cmd := exec.CommandContext(ctx, viper.GetString("denss_path"), args...)
+	err := cmd.Start()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err.Error(),
+			"id":    job.ID,
+		}).Error("Failed to start denss job")
+		return err
+	}
+
+	log.Infof("Waiting for denss thread %d for job %d to finish", thread, job.ID)
+	err = cmd.Wait()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error":  err.Error(),
+			"id":     job.ID,
+			"thread": thread,
+		}).Error("denss job failed")
+		return err
+	}
+
+	log.Infof("Denss thread %d for job %d completed", thread, job.ID)
+
+	return nil
+}
+
+func runDenss(job *model.Job, workDir string) error {
+	inputFile := filepath.Join(workDir, "input.dat")
+	err := ioutil.WriteFile(inputFile, job.InputData, 0700)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err.Error(),
+			"id":    job.ID,
+		}).Error("Failed to write input data file")
+		return err
+	}
+
+	var wg sync.WaitGroup
+	errChannel := make(chan error, 1)
+
+	maxRuns := int(job.MaxRuns)
+
+	wg.Add(maxRuns)
+	finished := make(chan bool, 1)
+
+	for i := 0; i < maxRuns; i++ {
+		go func(thread int) {
+			err = execDenss(job, workDir, inputFile, thread)
+			if err != nil {
+				errChannel <- err
+			}
+
+			wg.Done()
+		}(i)
+	}
+
+	go func() {
+		wg.Wait()
+		close(finished)
+	}()
+
+	select {
+	case <-finished:
+	case err := <-errChannel:
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func processJob(job *model.Job) error {
+	workDir := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss-%d", job.ID))
+	err := os.MkdirAll(workDir, 0700)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err.Error(),
+			"id":    job.ID,
+		}).Error("Failed to create working directory")
+		return err
+	}
+
+	return runDenss(job, workDir)
+}
 
 func RunClient() {
 	ctx, err := app.NewAppContext()
@@ -36,25 +159,32 @@ func RunClient() {
 		log.Fatal(err.Error())
 	}
 
-	job.DensityMap, err = ioutil.ReadFile("/home/ubuntu/mock-results/6lyz_averaged.ccp4")
+	err = processJob(job)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	job.FSCChart, err = ioutil.ReadFile("/home/ubuntu/mock-results/fsc.png")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	/*
+		job.DensityMap, err = ioutil.ReadFile("/home/ubuntu/mock-results/6lyz_averaged.ccp4")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-	job.RawData, err = ioutil.ReadFile("/home/ubuntu/mock-results/job1.zip")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+		job.FSCChart, err = ioutil.ReadFile("/home/ubuntu/mock-results/fsc.png")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-	err = model.CompleteJob(ctx.DB, job, model.StatusComplete)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+		job.RawData, err = ioutil.ReadFile("/home/ubuntu/mock-results/job1.zip")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-	log.Printf(job.URL())
+		err = model.CompleteJob(ctx.DB, job, model.StatusComplete)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		log.Printf(job.URL())
+	*/
 }
