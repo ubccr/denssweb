@@ -101,13 +101,21 @@ type Job struct {
 	Completed *time.Time `db:"completed"`
 }
 
-func (j *Job) URL() (string, error) {
+func (j *Job) b64Token() (string, error) {
 	b, err := hex.DecodeString(j.Token)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%s/job/%s", viper.GetString("base_url"), base64.RawURLEncoding.EncodeToString(b)), nil
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+func (j *Job) URL() (string, error) {
+	b64Token, err := j.b64Token()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/job/%s", viper.GetString("base_url"), b64Token), nil
 }
 
 // Fetch job by token. This is used for displaying the Job status in the web
@@ -261,6 +269,33 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
 	}
 
 	return &job, nil
+}
+
+// Complete Job
+func CompleteJob(db *sqlx.DB, job *Job, statusID int) error {
+	tx, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer tx.Commit()
+
+	job.StatusID = int64(statusID)
+	now := time.Now()
+	job.Completed = &now
+
+	_, err = tx.NamedExec(`
+        update job set
+            status_id = :status_id,
+            density_map = :density_map,
+            fsc_chart = :fsc_chart,
+            raw_data = :raw_data,
+            completed = :completed
+        where id = :id`, job)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Generate random tokens
