@@ -55,4 +55,7 @@ func RunClient() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	url, _ := job.URL()
+	log.Printf(url)
 }
