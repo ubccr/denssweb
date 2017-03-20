@@ -18,11 +18,15 @@
 package server
 
 import (
+	"bufio"
+	"bytes"
 	"database/sql"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
@@ -151,6 +155,33 @@ func submitJob(ctx *app.AppContext, data []byte, dmax string) (*model.Job, error
 	d, err := strconv.ParseFloat(dmax, 64)
 	if err != nil {
 		return nil, errors.New("Please a float for the maximum particle dimension")
+	}
+
+	// Validate input file
+	contentType := http.DetectContentType(data)
+	if !strings.HasPrefix(contentType, "text/plain") {
+		log.WithFields(log.Fields{
+			"contentType": contentType,
+		}).Error("Invalid input file uploaded")
+		return nil, fmt.Errorf("Invalid input data. Please provide an ascii text file")
+	}
+
+	reader := bytes.NewReader(data)
+	scanner := bufio.NewScanner(reader)
+	lineno := 0
+	for scanner.Scan() {
+		lineno++
+		line := scanner.Text()
+		parts := strings.Fields(line)
+		if len(parts) != 3 {
+			return nil, fmt.Errorf("Invalid input data format: error on line %d", lineno)
+		}
+		for _, n := range parts {
+			_, err := strconv.ParseFloat(n, 64)
+			if err != nil {
+				return nil, fmt.Errorf("Invalid floating point numbers found on line %d", lineno)
+			}
+		}
 	}
 
 	job := &model.Job{InputData: data, Dmax: d, Name: "test"}
