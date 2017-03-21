@@ -10,7 +10,7 @@
 </div>
 
 <p>
-URL: <a href="{{ .job.URL }}">{{ .job.URL }}</a> {{ if eq .job.Status "Complete" }}| Download Results: <a href="{{ .job.URL }}/raw-data.zip">raw-data.zip</a>  {{ end }}
+URL: <a href="{{ .job.URL }}">{{ .job.URL }}</a> {{ if eq .job.Status "Complete" }}| Download Results: <a href="{{ .job.URL }}/denss-{{ .job.ID }}-output.zip">denss-{{ .job.ID }}-output.zip</a>  {{ end }}
 </p>
 
 {{ if eq .job.Status "Complete" }}
