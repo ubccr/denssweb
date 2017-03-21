@@ -20,6 +20,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -43,6 +44,7 @@ func init() {
 	viper.SetDefault("denss_path", "/usr/local/bin/denss.py")
 }
 
+// Exec single denss.py process
 func execDenss(job *model.Job, workDir, inputFile string, thread int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), MaxSeconds*time.Second)
 	defer cancel()
@@ -88,6 +90,7 @@ func execDenss(job *model.Job, workDir, inputFile string, thread int) error {
 	return nil
 }
 
+// Run denss.py in parallel
 func runDenss(job *model.Job, workDir string) error {
 	inputFile := filepath.Join(workDir, "input.dat")
 	err := ioutil.WriteFile(inputFile, job.InputData, 0700)
@@ -130,6 +133,70 @@ func runDenss(job *model.Job, workDir string) error {
 			return err
 		}
 	}
+
+	// All denss.py process finished successfully. Need to convert xplor output
+	// files to mrc using map2map
+	for i := 0; i < maxRuns; i++ {
+		err := convertToMRC(workDir, i)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func convertToMRC(workDir string, num int) error {
+	xplorFile := filepath.Join(workDir, fmt.Sprintf("output_%d.xplor", num))
+	mrcFile := filepath.Join(workDir, fmt.Sprintf("output_%d.mrc", num))
+
+	args := []string{
+		xplorFile,
+		mrcFile,
+	}
+	log.Infof("Converting %s to mrc", xplorFile)
+	cmd := exec.Command(viper.GetString("map2map_path"), args...)
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error":     err.Error(),
+			"xplorFile": xplorFile,
+		}).Error("Failed stdin pipe")
+		return err
+	}
+
+	go func() {
+		defer stdin.Close()
+		io.WriteString(stdin, "2\n")
+	}()
+
+	err = cmd.Run()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error":     err.Error(),
+			"xplorFile": xplorFile,
+		}).Error("map2map command failed")
+		return err
+	}
+
+	_, err = os.Stat(mrcFile)
+	if os.IsNotExist(err) {
+		log.WithFields(log.Fields{
+			"error":     err.Error(),
+			"xplorFile": xplorFile,
+			"mrcFile":   mrcFile,
+		}).Error("mrc file does not exists. map2map failed")
+		return err
+	} else if err != nil {
+		log.WithFields(log.Fields{
+			"error":     err.Error(),
+			"xplorFile": xplorFile,
+			"mrcFile":   mrcFile,
+		}).Error("Failed to read mrc. map2map failed")
+		return err
+	}
+
+	log.Infof("%s successfully converted to mrc", xplorFile)
 
 	return nil
 }
