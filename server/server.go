@@ -51,7 +51,7 @@ func middleware(ctx *app.AppContext) *negroni.Negroni {
 	router.Path(fmt.Sprintf("/job/{id:%s}/status", TokenRegex)).Handler(StatusHandler(ctx)).Methods("GET")
 	router.Path(fmt.Sprintf("/job/{id:%s}/density-map.ccp4", TokenRegex)).Handler(DensityMapHandler(ctx)).Methods("GET")
 	router.Path(fmt.Sprintf("/job/{id:%s}/fsc.png", TokenRegex)).Handler(FSCChartHandler(ctx)).Methods("GET")
-	router.Path(fmt.Sprintf("/job/{id:%s}/raw-data.zip", TokenRegex)).Handler(RawDataHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}/denss-{jid:[0-9]+}-output.zip", TokenRegex)).Handler(RawDataHandler(ctx)).Methods("GET")
 	router.Path("/").Handler(IndexHandler(ctx)).Methods("GET")
 
 	n := negroni.New(negroni.NewRecovery())
