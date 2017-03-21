@@ -19,6 +19,7 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -31,7 +32,6 @@ func init() {
 	viper.SetConfigName("denssweb")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("/etc/denssweb/")
-	viper.AddConfigPath(".")
 }
 
 func main() {
@@ -91,8 +91,11 @@ func main() {
 		{
 			Name:  "client",
 			Usage: "Run client worker",
+			Flags: []cli.Flag{
+				&cli.IntFlag{Name: "threads, t", Value: runtime.NumCPU(), Usage: "Max threads (default numcpu)"},
+			},
 			Action: func(c *cli.Context) {
-				client.RunClient()
+				client.RunClient(c.Int("threads"))
 			},
 		}}
 
