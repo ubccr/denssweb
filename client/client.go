@@ -20,11 +20,12 @@ package client
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -92,6 +93,8 @@ func execDenss(job *model.Job, workDir, inputFile string, thread int) error {
 
 // Run denss.py in parallel
 func runDenss(job *model.Job, workDir string) error {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	inputFile := filepath.Join(workDir, "input.dat")
 	err := ioutil.WriteFile(inputFile, job.InputData, 0700)
 	if err != nil {
@@ -156,21 +159,11 @@ func convertToMRC(workDir string, num int) error {
 	}
 	log.Infof("Converting %s to mrc", xplorFile)
 	cmd := exec.Command(viper.GetString("map2map_path"), args...)
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"error":     err.Error(),
-			"xplorFile": xplorFile,
-		}).Error("Failed stdin pipe")
-		return err
-	}
 
-	go func() {
-		defer stdin.Close()
-		io.WriteString(stdin, "2\n")
-	}()
+	// This sets input file type to xplor for map2map command
+	cmd.Stdin = strings.NewReader("2\n")
 
-	err = cmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error":     err.Error(),
@@ -179,6 +172,7 @@ func convertToMRC(workDir string, num int) error {
 		return err
 	}
 
+	// Ensure mrc file exists
 	_, err = os.Stat(mrcFile)
 	if os.IsNotExist(err) {
 		log.WithFields(log.Fields{
@@ -201,7 +195,87 @@ func convertToMRC(workDir string, num int) error {
 	return nil
 }
 
-func processJob(job *model.Job) error {
+func buildStack(job *model.Job, workDir string) error {
+	stackFile := filepath.Join(workDir, "stack.hdf")
+	stackResizedFile := filepath.Join(workDir, "stack_resized.hdf")
+
+	args := []string{
+		"--stackname",
+		stackFile,
+	}
+	for i := 0; i < int(job.MaxRuns); i++ {
+		args = append(args, filepath.Join(workDir, fmt.Sprintf("output_%d.mrc", i)))
+	}
+	log.Infof("Building stack")
+
+	e2stacks := filepath.Join(viper.GetString("eman2dir"), "bin", "e2buildstacks.py")
+	cmd := exec.Command(e2stacks, args...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error":  err.Error(),
+			"output": string(out),
+		}).Error("e2buildstacks.py command failed")
+		return err
+	}
+
+	args = []string{
+		stackFile,
+		stackResizedFile,
+		"--clip",
+		fmt.Sprintf("%d", job.NumSamples-1),
+	}
+	log.Infof("Resizing stack")
+
+	e2proc3d := filepath.Join(viper.GetString("eman2dir"), "bin", "e2proc3d.py")
+	cmd = exec.Command(e2proc3d, args...)
+	out, err = cmd.CombinedOutput()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error":  err.Error(),
+			"output": string(out),
+		}).Error("e2proc3d.py command failed")
+		return err
+	}
+
+	return nil
+}
+
+func runAveraging(job *model.Job, workDir string) error {
+	stackResizedFile := filepath.Join(workDir, "stack_resized.hdf")
+	outPath := filepath.Join(workDir, "spt")
+
+	args := []string{
+		"--input",
+		stackResizedFile,
+		"--path",
+		outPath,
+		fmt.Sprintf("--parallel=thread:%d", runtime.NumCPU()),
+	}
+	log.Infof("Running averaging in threads:%d", runtime.NumCPU())
+
+	e2spt := filepath.Join(viper.GetString("eman2dir"), "bin", "e2spt_classaverage.py")
+	cmd := exec.Command(e2spt, args...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error":  err.Error(),
+			"output": string(out),
+		}).Error("e2spt_classaverage.py command failed")
+		return err
+	}
+
+	log.Infof("Averaging output")
+	log.Infof(string(out))
+
+	return nil
+}
+
+func processJob(ctx *app.AppContext, job *model.Job) error {
+	os.Setenv("LD_LIBRARY_PATH", filepath.Join(viper.GetString("eman2dir"), "lib"))
+	os.Setenv("PYTHONPATH", filepath.Join(viper.GetString("eman2dir"), "lib"))
+
+	model.LogJobMessage(ctx.DB, job, "Setup", "Creating job directory", 0)
 	workDir := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss-%d", job.ID))
 	err := os.MkdirAll(workDir, 0700)
 	if err != nil {
@@ -212,7 +286,37 @@ func processJob(job *model.Job) error {
 		return err
 	}
 
-	return runDenss(job, workDir)
+	model.LogJobMessage(ctx.DB, job, "Run DENSS", fmt.Sprintf("Performing %d parallel DENSS runs", job.MaxRuns), 25)
+	err = runDenss(job, workDir)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err.Error(),
+			"id":    job.ID,
+		}).Error("Failed to run denss")
+		return err
+	}
+
+	model.LogJobMessage(ctx.DB, job, "Build stack HDF", "Building and resizing stack", 50)
+	err = buildStack(job, workDir)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err.Error(),
+			"id":    job.ID,
+		}).Error("Failed to build stack hdf")
+		return err
+	}
+
+	model.LogJobMessage(ctx.DB, job, "Run Averaging", "Run parallel averaging using EMAN2", 75)
+	err = runAveraging(job, workDir)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err.Error(),
+			"id":    job.ID,
+		}).Error("Failed to run averaging")
+		return err
+	}
+
+	return nil
 }
 
 func RunClient() {
@@ -226,7 +330,7 @@ func RunClient() {
 		log.Fatal(err.Error())
 	}
 
-	err = processJob(job)
+	err = processJob(ctx, job)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

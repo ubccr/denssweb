@@ -363,6 +363,31 @@ func FetchRawData(db *sqlx.DB, token string) (*Job, error) {
 	return &job, nil
 }
 
+// Log message for job
+func LogJobMessage(db *sqlx.DB, job *Job, task, message string, percent int) error {
+	tx, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer tx.Commit()
+
+	job.Task = task
+	job.LogMessage = message
+	job.PercentComplete = int64(percent)
+
+	_, err = tx.NamedExec(`
+        update job set
+            task = :task,
+            log_message = :log_message,
+            percent_complete = :percent_complete
+        where id = :id`, job)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Generate random tokens
 func randToken() string {
 	b := make([]byte, 9)
