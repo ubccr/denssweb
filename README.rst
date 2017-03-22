@@ -41,6 +41,13 @@ Start the DENSSWeb client/serverl::
 
 Point your browser at http://localhost:8080 and submit a Job
 
+The raw output files for each job are stored in `work_dir/denss-JOBID`. `work_dir`
+defaults to `/tmp/denssweb-work` but you can override this in the denssweb.yaml
+file. The complete log file for a job is in a file named `denss-JOBID.log`.
+
+If you're running DENSSWeb on a server you must edit the `bind` and `base_url`
+settings accordingly.
+
 ------------------------------------------------------------------------
 Building from source
 ------------------------------------------------------------------------
