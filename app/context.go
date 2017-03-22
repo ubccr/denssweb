@@ -52,15 +52,30 @@ func NewAppContext() (*AppContext, error) {
 	tmpldir := viper.GetString("templates")
 	if len(tmpldir) == 0 {
 		// default to directory of current executable
-		path, err := filepath.EvalSymlinks(os.Args[0])
+		ex, err := os.Executable()
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		path, err := filepath.EvalSymlinks(ex)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		dir, err := filepath.Abs(filepath.Dir(path))
 		if err != nil {
 			log.Fatal(err)
 		}
-		tmpldir = dir + "/templates"
+
+		tmpldir = filepath.Join(dir, "dist", "templates")
+		if _, err := os.Stat(tmpldir); err != nil {
+			tmpldir = filepath.Join(dir, "templates")
+			if _, err := os.Stat(tmpldir); err != nil {
+				log.WithFields(log.Fields{
+					"error": err.Error(),
+				}).Warn("failed to find template directory")
+			}
+		}
 	}
 
 	log.Printf("Using template dir: %s", tmpldir)

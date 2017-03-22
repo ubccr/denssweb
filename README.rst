@@ -19,17 +19,47 @@ server runs an embedded web server and the client worker runs the DENSS
 pipeline.
 
 ------------------------------------------------------------------------
+Install
+------------------------------------------------------------------------
+
+Install all required software (see Required Software section). Download the
+current release of DENSSWeb for your platform `here <https://github.com/ubccr/denssweb/releases>`.
+
+Unpack the DENSSWeb release::
+
+    $ tar xzvf denssweb-VERSION-linux-amd64.tar.gz
+    $ cd denssweb-VERSION-linux-amd64
+
+Create the config file and edit the paths to required software::
+    $ cp denssweb.yaml.sample denssweb.yaml
+    (edit to taste)
+
+Start the DENSSWeb client/serverl::
+
+    $ ./denssweb -d -c denssweb.yaml run
+
+Point your browser at http://localhost:8080 and submit a Job
+
+------------------------------------------------------------------------
 Building from source
 ------------------------------------------------------------------------
 
-DENSSWeb is written in Go and uses `glide <http://glide.sh/>`_ for package
-management. Be sure you have a working Go environment and have glide installed.
-To compile from source run::
+DENSSWeb is written in `Go <https://golang.org/>`_ and uses `glide <http://glide.sh/>`_ 
+for package management. Be sure you have a working Go environment and have
+glide installed.  To compile from source run::
 
     $ git clone https://github.com/ubccr/denssweb
     $ cd dessweb
+    $ git submodule init
     $ glide install
     $ go build .
+
+To run DENSSWeb::
+
+    $ ./build.sh tmpl
+    $ cp denssweb.yaml.sample denssweb.yaml
+    (edit to taste)
+    $ ./denssweb -d -c denssweb.yaml run
 
 ------------------------------------------------------------------------
 Required Software
@@ -38,9 +68,9 @@ Required Software
 DENSSWeb requires the following software
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* DENSS
-* EMAN2
-* Situs
+* `DENSS <https://github.com/tdgrant1/denss>`_
+* `EMAN2 <https://github.com/cryoem/eman2>`_
+* `Situs <http://situs.biomachina.org>`_
 
 The following guide assumes you're running Linux Ubuntu 16.04. You will need to
 adjust package names for your distro.
@@ -65,13 +95,10 @@ Clone and install DENSS::
 Installing EMAN2
 ~~~~~~~~~~~~~~~~~
 
-Clone eman2 source code::
+Clone eman2 source code and run cmake::
 
     $ git clone https://github.com/cryoem/eman2
     $ cd eman2
-
-Run cmake::
-
     $ mkdir build
     $ cd build
     $ ccmake

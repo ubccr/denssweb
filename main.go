@@ -86,7 +86,7 @@ func main() {
 	}
 	app.Commands = []cli.Command{
 		{
-			Name:  "all",
+			Name:  "run",
 			Usage: "Run both http server and client work",
 			Flags: []cli.Flag{
 				&cli.IntFlag{Name: "threads, t", Value: runtime.NumCPU(), Usage: "Max threads (default numcpu)"},

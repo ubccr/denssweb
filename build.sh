@@ -50,7 +50,7 @@ make_release(){
 }
 
 case "$1" in
-        dist)
+        tmpl)
             tmpl_dist
             ;;
         release-linux)
@@ -74,6 +74,6 @@ case "$1" in
             make_release
             ;;
         *)
-            echo $"Usage: $0 {dist|release}"
+            echo $"Usage: $0 {tmpl|release-linux|release-darwin|release-windows}"
             exit 1
 esac
