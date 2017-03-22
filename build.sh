@@ -37,8 +37,8 @@ make_release(){
             cp -R ./scripts ${REL_DIR}/ 
             cp -R ./ddl ${REL_DIR}/ 
 
-            cd ${DENSSWEB_DIR} && zip -r ${NAME}.zip ${NAME}
-            mv  ${NAME}.zip ../
+            cd ${DENSSWEB_DIR} && tar cvzf ${NAME}.tar.gz ${NAME}
+            mv  ${NAME}.tar.gz ../
             cd ../
             rm -Rf ${DENSSWEB_DIR}
             rm ./denssweb
