@@ -19,16 +19,17 @@ server runs an embedded web server and the client worker runs the DENSS
 pipeline.
 
 ------------------------------------------------------------------------
-Installation
-------------------------------------------------------------------------
-
-TODO
-
-------------------------------------------------------------------------
 Building from source
 ------------------------------------------------------------------------
 
-TODO
+DENSSWeb is written in Go and uses `glide <http://glide.sh/>`_ for package
+management. Be sure you have a working Go environment and have glide installed.
+To compile from source run::
+
+    $ git clone https://github.com/ubccr/denssweb
+    $ cd dessweb
+    $ glide install
+    $ go build .
 
 ------------------------------------------------------------------------
 Required Software
