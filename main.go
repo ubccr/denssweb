@@ -28,6 +28,10 @@ import (
 	"github.com/urfave/cli"
 )
 
+var (
+	Version = "dev"
+)
+
 func init() {
 	viper.SetConfigName("denssweb")
 	viper.SetConfigType("yaml")
@@ -56,7 +60,7 @@ func main() {
 		{Name: "Andrew E. Bruno", Email: "aebruno2@buffalo.edu"},
 		{Name: "Thomas D. Grant", Email: "tgrant@hwi.buffalo.edu"}}
 	app.Usage = "denssweb"
-	app.Version = "0.0.1"
+	app.Version = Version
 	app.Flags = []cli.Flag{
 		&cli.StringFlag{Name: "conf,c", Usage: "Path to conf file"},
 		&cli.BoolFlag{Name: "debug,d", Usage: "Print debug messages"},
