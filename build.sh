@@ -19,39 +19,58 @@ tmpl_dist(){
 
 # Create a denssweb release
 make_release(){
-    for os in linux
-    do
-        for arch in amd64
-        do
-            NAME=denssweb-${VERSION}-${os}-${arch}
-            REL_DIR=${DENSSWEB_DIR}/${NAME}
-            GOOS=$os GOARCH=$arch go build -ldflags "-X main.Version=$VERSION" .
-            rm -Rf ${DENSSWEB_DIR}
-            mkdir -p ${REL_DIR}
-            cp ./denssweb ${REL_DIR}/ 
-            cp ./README.rst ${REL_DIR}/ 
-            cp ./AUTHORS.rst ${REL_DIR}/ 
-            cp ./ChangeLog.rst ${REL_DIR}/ 
-            cp ./LICENSE ${REL_DIR}/ 
-            cp -R ./dist/templates ${REL_DIR}/ 
-            cp -R ./scripts ${REL_DIR}/ 
-            cp -R ./ddl ${REL_DIR}/ 
+    local NAME=denssweb-${VERSION}-${GOOS}-${GOARCH}
+    local REL_DIR=${DENSSWEB_DIR}/${NAME}
+    go build -ldflags "-X main.Version=$VERSION" .
+    rm -Rf ${DENSSWEB_DIR}
+    mkdir -p ${REL_DIR}
+    cp ./README.rst ${REL_DIR}/ 
+    cp ./AUTHORS.rst ${REL_DIR}/ 
+    cp ./ChangeLog.rst ${REL_DIR}/ 
+    cp ./LICENSE ${REL_DIR}/ 
+    cp -R ./dist/templates ${REL_DIR}/ 
+    cp -R ./scripts ${REL_DIR}/ 
+    cp -R ./ddl ${REL_DIR}/ 
 
-            cd ${DENSSWEB_DIR} && tar cvzf ${NAME}.tar.gz ${NAME}
-            mv  ${NAME}.tar.gz ../
-            cd ../
-            rm -Rf ${DENSSWEB_DIR}
-            rm ./denssweb
-        done
-    done
+    if [ "$GOOS" == "windows" ]; then
+        cp ./denssweb.exe ${REL_DIR}/ 
+        cd ${DENSSWEB_DIR}
+        zip -r ${NAME}.zip ${NAME}
+        mv ${NAME}.zip ../
+    else
+        cp ./denssweb ${REL_DIR}/ 
+        cd ${DENSSWEB_DIR}
+        tar cvzf ${NAME}.tar.gz ${NAME}
+        mv ${NAME}.tar.gz ../
+    fi
+    cd ../
+    rm -Rf ${DENSSWEB_DIR}
+    rm -f ./denssweb
+    rm -f ./denssweb.exe
 }
 
 case "$1" in
         dist)
             tmpl_dist
             ;;
-        release)
+        release-linux)
             tmpl_dist
+            export GOOS=linux
+            export GOARCH=amd64
+            make_release
+            ;;
+        release-darwin)
+            tmpl_dist
+            export GOOS=darwin
+            export GOARCH=amd64
+            make_release
+            ;;
+        release-windows)
+            tmpl_dist
+            export GOOS=windows
+            export GOARCH=amd64
+            export CGO_ENABLED=1
+            export CC=x86_64-w64-mingw32-gcc
             make_release
             ;;
         *)
