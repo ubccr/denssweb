@@ -213,9 +213,8 @@ func RunClient(maxThreads int) {
 		}
 
 		logrus.WithFields(logrus.Fields{
-			"error": err.Error(),
-			"id":    job.ID,
-		}).Error("Job processed succesfully")
+			"id": job.ID,
+		}).Info("Job processed succesfully")
 
 		time.Sleep(3 * time.Second)
 	}
