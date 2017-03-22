@@ -21,7 +21,7 @@ namespace LiteMol.Denss {
     import Bootstrap = LiteMol.Bootstrap;            
     import Transformer = Bootstrap.Entity.Transformer;
 
-	// Download denss output as CCP4 and load the surface maps
+    // Download denss output as CCP4 and load the surface maps
     async function loadMap(plugin: Plugin.Controller, id: string, ccp4url: string) {
         let action = plugin.createTransform();
 
@@ -33,41 +33,41 @@ namespace LiteMol.Denss {
             .then(Transformer.Data.Download, { url: ccp4url, type: 'Binary' })
             .then(Transformer.Density.ParseData, { format: LiteMol.Core.Formats.Density.SupportedFormats.CCP4, id: id}, { isBinding: true, ref: 'denss-data' })
 
-		// Create 4 surface visuals with default styles
-		for (let i = 1; i < 5; i++) {
-			denss.then(Transformer.Density.CreateVisual, { style: Bootstrap.Visualization.Density.Default.Style }, { ref: 'denss-s'+i });
-		}
+        // Create 4 surface visuals with default styles
+        for (let i = 1; i < 5; i++) {
+            denss.then(Transformer.Density.CreateVisual, { style: Bootstrap.Visualization.Density.Default.Style }, { ref: 'denss-s'+i });
+        }
 
-		// Render density map and surfaces and wait for transform to finish
+        // Render density map and surfaces and wait for transform to finish
         await plugin.applyTransform(action);
 
-		// After the data is parsed, find max sigma and update the surfaces
+        // After the data is parsed, find max sigma and update the surfaces
         // with colors, sigma, and alpha values
 
-		// Fetch parsed CCP4 data
-		let data = plugin.context.select('denss-data')[0] as Bootstrap.Entity.Density.Data;
+        // Fetch parsed CCP4 data
+        let data = plugin.context.select('denss-data')[0] as Bootstrap.Entity.Density.Data;
 
-		// Find max sigma value
-		let maxSigma = Bootstrap.Utils.round(data.props.data.valuesInfo.max, 3)
+        // Find max sigma value
+        let maxSigma = Bootstrap.Utils.round(data.props.data.valuesInfo.max, 3)
 
-		let colors = [0x0000FF, 0x008000, 0xFFFF00, 0xFF0000] 
-		let scale = [0.05, 0.10, 0.25, 0.50] 
-		let alpha = [0.10, 0.25, 0.25, 0.50] 
+        let colors = [0x0000FF, 0x008000, 0xFFFF00, 0xFF0000] 
+        let scale = [0.05, 0.10, 0.25, 0.50] 
+        let alpha = [0.10, 0.25, 0.25, 0.50] 
 
-		// Update surface styles
-		for (let i = 1; i < 5; i++) {
-			let surface = plugin.context.select('denss-s'+i)[0] as Bootstrap.Entity.Density.Visual;
-			let sstyle = Bootstrap.Visualization.Density.Style.create({
-					isoValue: scale[i-1]*maxSigma,
-					isoValueType: Bootstrap.Visualization.Density.IsoValueType.Sigma,
-					color: LiteMol.Visualization.Color.fromHex(colors[i-1]), 
-					isWireframe: false,
-					transparency: { alpha: alpha[i-1]}
-			});
-			await Transformer.Density.CreateVisual.create({ style: sstyle }, { ref: surface.ref }).update(plugin.context, surface).run();
-		}
+        // Update surface styles
+        for (let i = 1; i < 5; i++) {
+            let surface = plugin.context.select('denss-s'+i)[0] as Bootstrap.Entity.Density.Visual;
+            let sstyle = Bootstrap.Visualization.Density.Style.create({
+                    isoValue: scale[i-1]*maxSigma,
+                    isoValueType: Bootstrap.Visualization.Density.IsoValueType.Sigma,
+                    color: LiteMol.Visualization.Color.fromHex(colors[i-1]), 
+                    isWireframe: false,
+                    transparency: { alpha: alpha[i-1]}
+            });
+            await Transformer.Density.CreateVisual.create({ style: sstyle }, { ref: surface.ref }).update(plugin.context, surface).run();
+        }
 
-		// After all surfaces have been updated reset scene view (this resets the zoom)
+        // After all surfaces have been updated reset scene view (this resets the zoom)
         plugin.command(Bootstrap.Command.Visual.ResetScene);
     }
         
@@ -77,7 +77,7 @@ namespace LiteMol.Denss {
     // Grab CCP4 data URL from HTML element
     let ccp4url = (((document.getElementById('ccp4url') as HTMLInputElement).value) || '').trim();
 
-	// Create LiteMol plugin
+    // Create LiteMol plugin
     let plugin = Plugin.create({
         target: '#app',
         layoutState: {
