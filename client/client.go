@@ -32,8 +32,12 @@ import (
 )
 
 func init() {
-	viper.SetDefault("work_dir", "/tmp")
+	// Try and set sensible defaults here
+	viper.SetDefault("work_dir", "/tmp/denssweb-work")
 	viper.SetDefault("denss_path", "/usr/local/bin/denss.py")
+	viper.SetDefault("map2map_path", filepath.Join(os.Getenv("HOME"), "Situs_2.8", "bin", "map2map"))
+	viper.SetDefault("eman2dir", filepath.Join(os.Getenv("HOME"), "EMAN2"))
+	viper.SetDefault("fsc_path", "scripts/fsc-chart.py")
 	// Defaults to 10 minutes
 	viper.SetDefault("max_seconds", 3600)
 }
@@ -159,13 +163,17 @@ func processJob(ctx *app.AppContext, job *model.Job, threads int) error {
 	return nil
 }
 
-func RunClient(maxThreads int) {
+func RunClient(ctx *app.AppContext, maxThreads int) {
+	logrus.Info("--------------------------------------------")
+	logrus.Info("External software paths")
+	logrus.Info("--------------------------------------------")
+	logrus.Infof("Path to denss.py: %s", viper.GetString("denss_path"))
+	logrus.Infof("Path to map2map: %s", viper.GetString("map2map_path"))
+	logrus.Infof("Path to EMAN2: %s", viper.GetString("eman2dir"))
+	logrus.Infof("Path to fsc-chart.py: %s", viper.GetString("fsc_path"))
+	logrus.Infof("Max number of seconds: %d", viper.GetInt("max_seconds"))
+	logrus.Info("--------------------------------------------")
 	runtime.GOMAXPROCS(maxThreads)
-
-	ctx, err := app.NewAppContext()
-	if err != nil {
-		logrus.Fatal(err.Error())
-	}
 
 	for {
 

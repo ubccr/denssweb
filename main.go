@@ -23,6 +23,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/ubccr/denssweb/app"
 	"github.com/ubccr/denssweb/client"
 	"github.com/ubccr/denssweb/server"
 	"github.com/urfave/cli"
@@ -39,9 +40,9 @@ func init() {
 }
 
 func main() {
-	app := cli.NewApp()
-	app.Name = "denssweb"
-	app.Copyright = `Copyright 2017 DENSSWeb Authors.  
+	capp := cli.NewApp()
+	capp.Name = "denssweb"
+	capp.Copyright = `Copyright 2017 DENSSWeb Authors.  
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -56,16 +57,16 @@ func main() {
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
    `
-	app.Authors = []cli.Author{
+	capp.Authors = []cli.Author{
 		{Name: "Andrew E. Bruno", Email: "aebruno2@buffalo.edu"},
 		{Name: "Thomas D. Grant", Email: "tgrant@hwi.buffalo.edu"}}
-	app.Usage = "denssweb"
-	app.Version = Version
-	app.Flags = []cli.Flag{
+	capp.Usage = "denssweb"
+	capp.Version = Version
+	capp.Flags = []cli.Flag{
 		&cli.StringFlag{Name: "conf,c", Usage: "Path to conf file"},
 		&cli.BoolFlag{Name: "debug,d", Usage: "Print debug messages"},
 	}
-	app.Before = func(c *cli.Context) error {
+	capp.Before = func(c *cli.Context) error {
 		if c.GlobalBool("debug") {
 			log.SetLevel(log.InfoLevel)
 		} else {
@@ -84,7 +85,7 @@ func main() {
 
 		return nil
 	}
-	app.Commands = []cli.Command{
+	capp.Commands = []cli.Command{
 		{
 			Name:  "run",
 			Usage: "Run both http server and client work",
@@ -92,15 +93,23 @@ func main() {
 				&cli.IntFlag{Name: "threads, t", Value: runtime.NumCPU(), Usage: "Max threads (default numcpu)"},
 			},
 			Action: func(c *cli.Context) {
-				go client.RunClient(c.Int("threads"))
-				server.RunServer()
+				ctx, err := app.NewAppContext()
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				go client.RunClient(ctx, c.Int("threads"))
+				server.RunServer(ctx)
 			},
 		},
 		{
 			Name:  "server",
 			Usage: "Run http server only",
 			Action: func(c *cli.Context) {
-				server.RunServer()
+				ctx, err := app.NewAppContext()
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				server.RunServer(ctx)
 			},
 		},
 		{
@@ -110,9 +119,13 @@ func main() {
 				&cli.IntFlag{Name: "threads, t", Value: runtime.NumCPU(), Usage: "Max threads (default numcpu)"},
 			},
 			Action: func(c *cli.Context) {
-				client.RunClient(c.Int("threads"))
+				ctx, err := app.NewAppContext()
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				client.RunClient(ctx, c.Int("threads"))
 			},
 		}}
 
-	app.RunAndExitOnError()
+	capp.RunAndExitOnError()
 }

@@ -34,7 +34,8 @@ const (
 
 func init() {
 	viper.SetDefault("port", 8080)
-	viper.SetDefault("bind", "")
+	viper.SetDefault("bind", "127.0.0.1")
+	viper.SetDefault("base_url", "http://localhost:8080")
 }
 
 func middleware(ctx *app.AppContext) *negroni.Negroni {
@@ -60,12 +61,7 @@ func middleware(ctx *app.AppContext) *negroni.Negroni {
 	return n
 }
 
-func RunServer() {
-	ctx, err := app.NewAppContext()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
+func RunServer(ctx *app.AppContext) {
 	mw := middleware(ctx)
 
 	log.Printf("Running on http://%s:%d", viper.GetString("bind"), viper.GetInt("port"))
@@ -74,9 +70,9 @@ func RunServer() {
 	keyFile := viper.GetString("key")
 
 	if certFile != "" && keyFile != "" {
+		log.Warn("SSL/TLS enabled. HTTP communication will be encrypted")
 		http.ListenAndServeTLS(fmt.Sprintf("%s:%d", viper.GetString("bind"), viper.GetInt("port")), certFile, keyFile, mw)
 	} else {
-		log.Warn("**WARNING*** SSL/TLS not enabled. HTTP communication will not be encrypted and vulnerable to snooping.")
 		http.ListenAndServe(fmt.Sprintf("%s:%d", viper.GetString("bind"), viper.GetInt("port")), mw)
 	}
 }

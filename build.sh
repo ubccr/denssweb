@@ -28,6 +28,7 @@ make_release(){
     cp ./AUTHORS.rst ${REL_DIR}/ 
     cp ./ChangeLog.rst ${REL_DIR}/ 
     cp ./LICENSE ${REL_DIR}/ 
+    cp ./denssweb.yaml.sample ${REL_DIR}/ 
     cp -R ./dist/templates ${REL_DIR}/ 
     cp -R ./scripts ${REL_DIR}/ 
     cp -R ./ddl ${REL_DIR}/ 

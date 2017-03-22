@@ -31,6 +31,7 @@ Unpack the DENSSWeb release::
     $ cd denssweb-VERSION-linux-amd64
 
 Create the config file and edit the paths to required software::
+
     $ cp denssweb.yaml.sample denssweb.yaml
     (edit to taste)
 
