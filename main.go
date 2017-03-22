@@ -82,15 +82,26 @@ func main() {
 	}
 	app.Commands = []cli.Command{
 		{
+			Name:  "all",
+			Usage: "Run both http server and client work",
+			Flags: []cli.Flag{
+				&cli.IntFlag{Name: "threads, t", Value: runtime.NumCPU(), Usage: "Max threads (default numcpu)"},
+			},
+			Action: func(c *cli.Context) {
+				go client.RunClient(c.Int("threads"))
+				server.RunServer()
+			},
+		},
+		{
 			Name:  "server",
-			Usage: "Run http server",
+			Usage: "Run http server only",
 			Action: func(c *cli.Context) {
 				server.RunServer()
 			},
 		},
 		{
 			Name:  "client",
-			Usage: "Run client worker",
+			Usage: "Run client worker only",
 			Flags: []cli.Flag{
 				&cli.IntFlag{Name: "threads, t", Value: runtime.NumCPU(), Usage: "Max threads (default numcpu)"},
 			},

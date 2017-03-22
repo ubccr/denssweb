@@ -1,13 +1,17 @@
 ---
 #------------------------------------------------------------------------------
-# Database connection
+# Database connection (dsn for mysql or filepath for sqlite3)
 #------------------------------------------------------------------------------
-dsn: "user:pass@/dbname?parseTime=true"
+# MySQL
+# dsn: "user:pass@tcp(127.0.0.1:3306)/dbname?parseTime=true"
+#
+# sqlite3
+dsn: "/tmp/denssweb.db?_busy_timeout=5000&cache=shared"
 
 #------------------------------------------------------------------------------
-# Database driver
+# Database driver (mysql|sqlite3)
 #------------------------------------------------------------------------------
-driver: "mysql"
+driver: "sqlite3"
 
 #------------------------------------------------------------------------------
 # Webserver port to lisen on

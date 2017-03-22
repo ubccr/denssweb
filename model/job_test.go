@@ -23,7 +23,7 @@ import (
 )
 
 func TestJob(t *testing.T) {
-	db, err := newTestDb()
+	db, err := NewDB("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatal(err)
 	}

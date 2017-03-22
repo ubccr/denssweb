@@ -32,8 +32,8 @@ import (
 )
 
 func init() {
-	viper.SetDefault("driver", "mysql")
-	viper.SetDefault("dsn", "/denssweb?parseTime=true")
+	viper.SetDefault("driver", "sqlite3")
+	viper.SetDefault("dsn", "/tmp/denssweb.db?_busy_timeout=5000&cache=shared")
 }
 
 type AppContext struct {
@@ -44,7 +44,7 @@ type AppContext struct {
 }
 
 func NewAppContext() (*AppContext, error) {
-	db, err := model.NewDb()
+	db, err := model.NewDB(viper.GetString("driver"), viper.GetString("dsn"))
 	if err != nil {
 		return nil, err
 	}
