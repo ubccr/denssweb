@@ -23,7 +23,7 @@ Install
 ------------------------------------------------------------------------
 
 Install all required software (see Required Software section). Download the
-current release of DENSSWeb for your platform `here <https://github.com/ubccr/denssweb/releases>`.
+current release of DENSSWeb for your platform `here <https://github.com/ubccr/denssweb/releases>`_.
 
 Unpack the DENSSWeb release::
 
