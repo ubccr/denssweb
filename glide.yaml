@@ -1,0 +1,12 @@
+package: github.com/ubccr/denssweb
+homepage: https://github.com/ubccr/denssweb
+license: GPLv3
+import:
+- package: github.com/Sirupsen/logrus
+- package: github.com/go-sql-driver/mysql
+- package: github.com/gorilla/mux
+- package: github.com/jmoiron/sqlx
+- package: github.com/mattn/go-sqlite3
+- package: github.com/spf13/viper
+- package: github.com/urfave/cli
+- package: github.com/urfave/negroni
