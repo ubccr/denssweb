@@ -52,6 +52,8 @@ settings accordingly.
 Building from source
 ------------------------------------------------------------------------
 
+Compile the DENSS Viewer LiteMol plugin. See `here <denss-viewer/README.rst>`_
+
 DENSSWeb is written in `Go <https://golang.org/>`_ and uses `glide <http://glide.sh/>`_ 
 for package management. Be sure you have a working Go environment and have
 glide installed.  To compile from source run::
