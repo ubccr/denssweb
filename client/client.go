@@ -37,7 +37,8 @@ func init() {
 	viper.SetDefault("denss_path", "/usr/local/bin/denss.py")
 	viper.SetDefault("map2map_path", filepath.Join(os.Getenv("HOME"), "Situs_2.8", "bin", "map2map"))
 	viper.SetDefault("eman2dir", filepath.Join(os.Getenv("HOME"), "EMAN2"))
-	viper.SetDefault("fsc_path", "scripts/fsc-chart.py")
+	fscPath, _ := filepath.Abs(filepath.Join("scripts", "fsc-chart.py"))
+	viper.SetDefault("fsc_path", fscPath)
 	// Defaults to 10 minutes
 	viper.SetDefault("max_seconds", 3600)
 }
@@ -176,6 +177,7 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 	runtime.GOMAXPROCS(maxThreads)
 
 	for {
+		time.Sleep(3 * time.Second)
 
 		job, err := model.FetchNextPending(ctx.DB)
 		if err != nil {
@@ -186,8 +188,6 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 					"error": err.Error(),
 				}).Error("Failed to fetch pending job")
 			}
-
-			time.Sleep(3 * time.Second)
 			continue
 		}
 
@@ -209,6 +209,7 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 				"error": err.Error(),
 				"id":    job.ID,
 			}).Error("Failed to process job")
+			continue
 		}
 
 		model.LogJobMessage(ctx.DB, job, "Complete", "Job completed successfully", 100)
@@ -218,12 +219,11 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 				"error": err.Error(),
 				"id":    job.ID,
 			}).Error("Failed to save completed job")
+			continue
 		}
 
 		logrus.WithFields(logrus.Fields{
 			"id": job.ID,
 		}).Info("Job processed succesfully")
-
-		time.Sleep(3 * time.Second)
 	}
 }
