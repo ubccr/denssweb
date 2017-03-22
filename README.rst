@@ -2,7 +2,21 @@
 DENSSWeb - Web frontend to DENSS
 ===============================================================================
 
-DENSSWeb is the web frontend for the `DENSS algorithm <https://github.com/tdgrant1/denss>`_.
+DENSSWeb is a web frontend for the `DENSS algorithm <https://github.com/tdgrant1/denss>`_.
+DENsity from Solution Scattering (DENSS) is an algorithm used for calculating
+ab initio electron density maps directly from solution scattering data.
+DENSSWeb provides a web based frontend interface allowing users to run complex
+DENSS pipelines and view results in a browser. DENSSWeb performs parallel DENSS
+runs and averages the results using EMAN2. The resulting density map is
+displayed using a custom LiteMol plugin along with a plot of the fourier shell
+correlation (FSC) curve.
+
+A demo fo DENSSWeb can be found `here <http://denss.ccr.buffalo.edu>`_.
+
+DENSSWeb can be run locally on a single machine or on multiple machines in a
+clustered environment. DENSSWeb consists of a server and client worker. The
+server runs an embedded web server and the client worker runs the DENSS
+pipeline.
 
 ------------------------------------------------------------------------
 Installation
@@ -21,13 +35,16 @@ Required Software
 ------------------------------------------------------------------------
 
 DENSSWeb requires the following software
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * DENSS
 * EMAN2
 * Situs
 
-The following assumes you're running Ubuntu 16.04. Install required
-packages::
+The following guide assumes you're running Linux Ubuntu 16.04. You will need to
+adjust package names for your distro.
+
+Install required packages::
 
     $ apt-get install libhdf5-10 libhdf5-dev libpng12-0 libpng12-dev libtiff5 libtiff5-dev \
          python-qt4 python-qt4-gl python-opengl python-matplotlib libfftw3-3 libfftw3-dev \
@@ -42,7 +59,7 @@ Clone and install DENSS::
 
     $ git clone https://github.com/tdgrant1/denss
     $ cd denss
-    $ pyton setup.py install
+    $ python setup.py install
 
 Installing EMAN2
 ~~~~~~~~~~~~~~~~~
