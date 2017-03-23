@@ -19,6 +19,7 @@ package app
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -33,7 +34,22 @@ import (
 
 func init() {
 	viper.SetDefault("driver", "sqlite3")
-	viper.SetDefault("dsn", "/tmp/denssweb.db?_busy_timeout=5000&cache=shared")
+	dbPath := "/tmp/denssweb.db"
+	wd, err := os.Getwd()
+	if err == nil {
+		dbPath = filepath.Join(wd, "denssweb.db")
+	}
+	viper.SetDefault("dsn", fmt.Sprintf("%s?_busy_timeout=5000&cache=shared", dbPath))
+
+	tmpldir := filepath.Join(wd, "dist", "templates")
+	if _, err := os.Stat(tmpldir); err == nil {
+		viper.SetDefault("templates", tmpldir)
+	} else {
+		tmpldir = filepath.Join(wd, "templates")
+		if _, err := os.Stat(tmpldir); err == nil {
+			viper.SetDefault("templates", tmpldir)
+		}
+	}
 }
 
 type AppContext struct {
@@ -51,34 +67,13 @@ func NewAppContext() (*AppContext, error) {
 
 	tmpldir := viper.GetString("templates")
 	if len(tmpldir) == 0 {
-		// default to directory of current executable
-		ex, err := os.Executable()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		path, err := filepath.EvalSymlinks(ex)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		dir, err := filepath.Abs(filepath.Dir(path))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		tmpldir = filepath.Join(dir, "dist", "templates")
-		if _, err := os.Stat(tmpldir); err != nil {
-			tmpldir = filepath.Join(dir, "templates")
-			if _, err := os.Stat(tmpldir); err != nil {
-				log.WithFields(log.Fields{
-					"error": err.Error(),
-				}).Warn("failed to find template directory")
-			}
-		}
+		log.Warn("Template directory not set. Server will not work")
+		tmpldir = "templates"
+	} else {
+		log.WithFields(log.Fields{
+			"path": tmpldir,
+		}).Info("Using template directory")
 	}
-
-	log.Printf("Using template dir: %s", tmpldir)
 
 	tmpls, err := filepath.Glob(tmpldir + "/*.html")
 	if err != nil {

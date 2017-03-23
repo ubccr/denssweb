@@ -37,7 +37,7 @@ Create the config file and edit the paths to required software::
 
 Start the DENSSWeb client/serverl::
 
-    $ ./denssweb -d -c denssweb.yaml run
+    $ ./denssweb -d run
 
 Point your browser at http://localhost:8080 and submit a Job
 
@@ -58,18 +58,12 @@ DENSSWeb is written in `Go <https://golang.org/>`_ and uses `glide <http://glide
 for package management. Be sure you have a working Go environment and have
 glide installed.  To compile from source run::
 
-    $ git clone https://github.com/ubccr/denssweb
-    $ cd dessweb
-    $ git submodule init
-    $ glide install
-    $ go build .
-
-To run DENSSWeb::
-
+    $ go get -u github.com/ubccr/denssweb
+    $ cd $GOPATH/src/github.com/ubccr/dessweb
     $ ./build.sh tmpl
     $ cp denssweb.yaml.sample denssweb.yaml
     (edit to taste)
-    $ ./denssweb -d -c denssweb.yaml run
+    $ denssweb -d run
 
 ------------------------------------------------------------------------
 Required Software

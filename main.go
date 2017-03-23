@@ -18,7 +18,6 @@
 package main
 
 import (
-	"fmt"
 	"runtime"
 
 	log "github.com/Sirupsen/logrus"
@@ -36,7 +35,7 @@ var (
 func init() {
 	viper.SetConfigName("denssweb")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath("/etc/denssweb/")
+	viper.AddConfigPath(".")
 }
 
 func main() {
@@ -80,7 +79,9 @@ func main() {
 
 		err := viper.ReadInConfig()
 		if err != nil {
-			return fmt.Errorf("Failed reading config file - %s", err)
+			log.WithFields(log.Fields{
+				"error": err.Error(),
+			}).Warn("Failed to parse config file. Using defaults")
 		}
 
 		return nil
