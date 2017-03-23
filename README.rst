@@ -27,26 +27,27 @@ current release of DENSSWeb for your platform `here <https://github.com/ubccr/de
 
 Unpack the DENSSWeb release::
 
-    $ tar xzvf denssweb-VERSION-linux-amd64.tar.gz
-    $ cd denssweb-VERSION-linux-amd64
+    $ tar xzvf denssweb-VERSION-OS-amd64.tar.gz
+    $ cd denssweb-VERSION-OS-amd64
 
 Create the config file and edit the paths to required software::
 
     $ cp denssweb.yaml.sample denssweb.yaml
     (edit to taste)
 
-Start the DENSSWeb client/serverl::
+Start the DENSSWeb client/server::
 
     $ ./denssweb -d run
 
 Point your browser at http://localhost:8080 and submit a Job
 
-The raw output files for each job are stored in `work_dir/denss-JOBID`. `work_dir`
-defaults to `/tmp/denssweb-work` but you can override this in the denssweb.yaml
-file. The complete log file for a job is in a file named `denss-JOBID.log`.
+The raw output files for each job are stored in ::`work_dir/denss-JOBID`.
+::`work_dir` defaults to ::`/tmp/denssweb-work` but you can override this in
+the denssweb.yaml file. The complete log file for a job is in a file named
+::`denss-JOBID.log`.
 
-If you're running DENSSWeb on a server you must edit the `bind` and `base_url`
-settings accordingly.
+If you're running DENSSWeb on a server you must edit the ::`bind` and
+::`base_url` settings accordingly.
 
 ------------------------------------------------------------------------
 Building from source

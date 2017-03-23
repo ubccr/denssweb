@@ -198,7 +198,8 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 		}
 
 		logrus.WithFields(logrus.Fields{
-			"id": job.ID,
+			"id":  job.ID,
+			"url": job.URL(),
 		}).Info("Processing new job")
 
 		err = processJob(ctx, job, maxThreads)
@@ -207,12 +208,14 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 			if cerr != nil {
 				logrus.WithFields(logrus.Fields{
 					"error": cerr.Error(),
+					"url":   job.URL,
 					"id":    job.ID,
 				}).Error("Failed save failed job to database")
 			}
 
 			logrus.WithFields(logrus.Fields{
 				"error": err.Error(),
+				"url":   job.URL,
 				"id":    job.ID,
 			}).Error("Failed to process job")
 			continue
@@ -223,13 +226,15 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"error": err.Error(),
+				"url":   job.URL,
 				"id":    job.ID,
 			}).Error("Failed to save completed job")
 			continue
 		}
 
 		logrus.WithFields(logrus.Fields{
-			"id": job.ID,
+			"id":  job.ID,
+			"url": job.URL,
 		}).Info("Job processed succesfully")
 	}
 }
