@@ -116,6 +116,7 @@ func runAveraging(log *logrus.Logger, job *model.Job, workDir string, threads in
 		"--input",
 		stackResizedFile,
 		fmt.Sprintf("--parallel=thread:%d", threads),
+		"--saveali",
 	}
 
 	log.WithFields(logrus.Fields{
