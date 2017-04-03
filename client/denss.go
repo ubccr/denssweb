@@ -80,7 +80,7 @@ func execDenss(log *logrus.Logger, job *model.Job, workDir, inputFile string, th
 func runDenss(log *logrus.Logger, job *model.Job, workDir string) error {
 
 	inputFile := filepath.Join(workDir, "input.dat")
-	err := ioutil.WriteFile(inputFile, job.InputData, 0700)
+	err := ioutil.WriteFile(inputFile, job.InputData, 0640)
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"error": err.Error(),

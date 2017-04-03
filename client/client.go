@@ -79,7 +79,7 @@ func processJob(ctx *app.AppContext, job *model.Job, threads int) error {
 	log := logrus.New()
 
 	logPath := filepath.Join(workDir, fmt.Sprintf("denss-%d.log", job.ID))
-	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY, 0600)
+	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY, 0640)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err.Error(),
