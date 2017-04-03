@@ -70,6 +70,9 @@ type Job struct {
 	// Fourier SHell Correlation (FSC) Curve chart
 	FSCChart []byte `db:"fsc_chart" json:"-"`
 
+	// Summary stats chart
+	SummaryChart []byte `db:"summary_chart" json:"-"`
+
 	// A zip of the raw output from DENSS
 	RawData []byte `db:"raw_data" json:"-"`
 
@@ -290,6 +293,7 @@ func CompleteJob(db *sqlx.DB, job *Job, statusID int) error {
             status_id = :status_id,
             density_map = :density_map,
             fsc_chart = :fsc_chart,
+            summary_chart = :summary_chart,
             raw_data = :raw_data,
             completed = :completed
         where id = :id`, job)
@@ -330,6 +334,27 @@ func FetchFSCChart(db *sqlx.DB, token string) (*Job, error) {
 			j.status_id,
             j.name,
             j.fsc_chart,
+            j.submitted,
+            j.started,
+            j.completed
+        from job as j 
+        where j.token = ?`, token)
+	if err != nil {
+		return nil, err
+	}
+
+	return &job, nil
+}
+
+// Fetch job summary chart by token.
+func FetchSummaryChart(db *sqlx.DB, token string) (*Job, error) {
+	job := Job{}
+	err := db.Get(&job, `
+		select
+			j.id,
+			j.status_id,
+            j.name,
+            j.summary_chart,
             j.submitted,
             j.started,
             j.completed

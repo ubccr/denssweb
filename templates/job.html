@@ -18,19 +18,26 @@ URL: <a href="{{ .job.URL }}">{{ .job.URL }}</a> {{ if eq .job.Status "Complete"
     <div class="alert alert-success" role="alert">
         <strong>Complete</strong> Your job was completed at {{ .job.Completed.Local.Format "15:04:05 EST on Jan 02, 2006" }}
     </div>
-    <div class="page-header">Fourier Shell Correlation (FSC) curve</div>
+    <div class="page-header">Electron Density Map</div>
+    <div class="row">
+        <input type="hidden" value="DENSS_{{ .job.ID }}" id="jobid" />
+        <input type="hidden" value="{{ .job.URL }}/density-map.ccp4" id="ccp4url" />
+        <div id="app"></div>
+        <script src="/static/js/LiteMol-denss.js?lmversion=14"></script>
+    </div>
+    <div class="page-header">DENSS Summary Statistics</div>
     <div class="row">
         <div class="col-xs-6 col-sm-6 col-md-6">
             <a href="{{ .job.URL }}/fsc.png" class="thumbnail">
             <img src="{{ .job.URL }}/fsc.png" alt="FSC">
             </a>
         </div>
+        <div class="col-xs-6 col-sm-6 col-md-6">
+            <a href="{{ .job.URL }}/summary.png" class="thumbnail">
+            <img src="{{ .job.URL }}/summary.png" alt="Summary Stats">
+            </a>
+        </div>
     </div>
-    <div class="page-header">Electron Density Map</div>
-    <input type="hidden" value="DENSS_{{ .job.ID }}" id="jobid" />
-    <input type="hidden" value="{{ .job.URL }}/density-map.ccp4" id="ccp4url" />
-    <div id="app"></div>
-    <script src="/static/js/LiteMol-denss.js?lmversion=14"></script>
 {{ else if or (eq .job.Status "Running") ( eq .job.Status "Pending") }}
     {{ if eq .job.Status "Running" }}
     <div class="alert alert-warning" role="alert">

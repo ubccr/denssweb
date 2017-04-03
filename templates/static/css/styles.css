@@ -20,8 +20,5 @@ body {
 
 #app {
     position: relative;
-    margin-top: 80px;
-    margin-bottom: 400px;
-    width: 640px;
     height: 480px;
 }    

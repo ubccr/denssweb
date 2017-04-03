@@ -35,14 +35,15 @@ func init() {
 	// Try and set sensible defaults here
 	wd, err := os.Getwd()
 	if err != nil {
-		wd = "/tmp"
+		wd = os.TempDir()
 	}
 
 	viper.SetDefault("work_dir", filepath.Join(wd, "denssweb-work"))
 	viper.SetDefault("denss_path", "/usr/local/bin/denss.py")
 	viper.SetDefault("map2map_path", filepath.Join(os.Getenv("HOME"), "Situs_2.8", "bin", "map2map"))
 	viper.SetDefault("eman2dir", filepath.Join(os.Getenv("HOME"), "EMAN2"))
-	viper.SetDefault("fsc_path", filepath.Join(wd, "scripts", "fsc-chart.py"))
+	viper.SetDefault("fsc_path", filepath.Join(wd, "scripts", "denssweb-fsc-chart.py"))
+	viper.SetDefault("summary_path", filepath.Join(wd, "scripts", "denssweb-summary-chart.py"))
 	// Defaults to 10 minutes
 	viper.SetDefault("max_seconds", 3600)
 }
@@ -153,6 +154,20 @@ func processJob(ctx *app.AppContext, job *model.Job, threads int) error {
 
 	logrus.WithFields(logrus.Fields{
 		"id": job.ID,
+	}).Info("Creating Summary Chart")
+	model.LogJobMessage(ctx.DB, job, "Summary Chart", "Plotting Summary Stats", 90)
+	err = plotSummary(log, job, workDir)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+			"id":    job.ID,
+		}).Error("Failed to plot Summary chart")
+		model.LogJobMessage(ctx.DB, job, "Summary Chart Failed", "Failed to plot summary stats", 0)
+		return err
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"id": job.ID,
 	}).Info("Creating zip archive")
 	model.LogJobMessage(ctx.DB, job, "Creating ZIP", "Building zip archive of raw data", 95)
 	err = createZIP(log, job, workDir)
@@ -175,7 +190,8 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 	logrus.Infof("Path to denss.py: %s", viper.GetString("denss_path"))
 	logrus.Infof("Path to map2map: %s", viper.GetString("map2map_path"))
 	logrus.Infof("Path to EMAN2: %s", viper.GetString("eman2dir"))
-	logrus.Infof("Path to fsc-chart.py: %s", viper.GetString("fsc_path"))
+	logrus.Infof("Path to denssweb-fsc-chart.py: %s", viper.GetString("fsc_path"))
+	logrus.Infof("Path to denss-summary-chart.py: %s", viper.GetString("summary_path"))
 	logrus.Infof("Max number of seconds: %d", viper.GetInt("max_seconds"))
 	logrus.Infof("Job Work directory: %s", viper.GetString("work_dir"))
 	logrus.Infof("Max threads: %d", maxThreads)
@@ -208,14 +224,14 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 			if cerr != nil {
 				logrus.WithFields(logrus.Fields{
 					"error": cerr.Error(),
-					"url":   job.URL,
+					"url":   job.URL(),
 					"id":    job.ID,
 				}).Error("Failed save failed job to database")
 			}
 
 			logrus.WithFields(logrus.Fields{
 				"error": err.Error(),
-				"url":   job.URL,
+				"url":   job.URL(),
 				"id":    job.ID,
 			}).Error("Failed to process job")
 			continue
@@ -226,7 +242,7 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"error": err.Error(),
-				"url":   job.URL,
+				"url":   job.URL(),
 				"id":    job.ID,
 			}).Error("Failed to save completed job")
 			continue
@@ -234,7 +250,7 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 
 		logrus.WithFields(logrus.Fields{
 			"id":  job.ID,
-			"url": job.URL,
+			"url": job.URL(),
 		}).Info("Job processed succesfully")
 	}
 }

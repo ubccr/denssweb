@@ -10,6 +10,7 @@ CREATE TABLE `job` (
     `input_data`       mediumblob        NOT NULL,
     `density_map`      mediumblob        NULL,
     `fsc_chart`        mediumblob        NULL,
+    `summary_chart`    mediumblob        NULL,
     `raw_data`         mediumblob        NULL,
     `dmax`             float             NOT NULL,
     `num_samples`      int(11)           NOT NULL,

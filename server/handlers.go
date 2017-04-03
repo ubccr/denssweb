@@ -305,3 +305,32 @@ func StatusHandler(ctx *app.AppContext) http.Handler {
 		w.Write(out)
 	})
 }
+
+func SummaryChartHandler(ctx *app.AppContext) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := mux.Vars(r)["id"]
+		job, err := model.FetchSummaryChart(ctx.DB, id)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"error": err.Error(),
+				"id":    id,
+			}).Error("Failed to fetch job from database")
+
+			if err == sql.ErrNoRows {
+				ctx.RenderNotFound(w)
+			} else {
+				ctx.RenderError(w, http.StatusInternalServerError)
+			}
+
+			return
+		}
+
+		if job.SummaryChart != nil {
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(job.SummaryChart)
+			return
+		}
+
+		ctx.RenderNotFound(w)
+	})
+}
