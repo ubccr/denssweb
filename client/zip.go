@@ -18,97 +18,73 @@
 package client
 
 import (
-	"archive/zip"
-	"bytes"
+	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/jhoonb/archivex"
+	"github.com/spf13/viper"
 	"github.com/ubccr/denssweb/model"
 )
 
 // Create zip archive file of DENSS output files
 func createZIP(log *logrus.Logger, job *model.Job, workDir string) error {
+	zipFile := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss-%d.zip", job.ID))
+	os.Remove(zipFile)
 
 	log.WithFields(logrus.Fields{
-		"id": job.ID,
+		"id":      job.ID,
+		"zipFile": zipFile,
 	}).Info("Creating zip archive")
 
-	buf := new(bytes.Buffer)
-	w := zip.NewWriter(buf)
+	zip := new(archivex.ZipFile)
 
-	finalAvg, err := ioutil.ReadFile(filepath.Join(workDir, "spt_01", "final_avg_ali2ref.hdf"))
+	err := zip.Create(zipFile)
 	if err != nil {
 		log.WithFields(logrus.Fields{
-			"error": err.Error(),
-			"id":    job.ID,
-			"file":  finalAvg,
-		}).Error("Failed to read hdf file")
+			"error":   err.Error(),
+			"id":      job.ID,
+			"zipFile": zipFile,
+		}).Error("Failed to create zip file")
 		return err
 	}
 
-	fsc01, err := ioutil.ReadFile(filepath.Join(workDir, "spt_01", "fsc_0.txt"))
+	err = zip.AddAll(workDir, true)
 	if err != nil {
 		log.WithFields(logrus.Fields{
-			"error": err.Error(),
-			"id":    job.ID,
-			"file":  fsc01,
-		}).Error("Failed to read fsc file")
+			"error":   err.Error(),
+			"id":      job.ID,
+			"zipFile": zipFile,
+			"workDir": workDir,
+		}).Error("Failed to create zip file from workDir")
 		return err
 	}
 
-	var files = []struct {
-		Name string
-		Body []byte
-	}{
-		{"density-map.ccp4", job.DensityMap},
-		{"final_avg_ali2ref.hdf", finalAvg},
-		{"fsc.png", job.FSCChart},
-		{"fsc_01.txt", fsc01},
-	}
-	for _, file := range files {
-		header := &zip.FileHeader{
-			Name:               file.Name,
-			Method:             zip.Store,
-			UncompressedSize64: uint64(len(file.Body)),
-		}
-		header.SetModTime(time.Now().UTC())
-		header.SetMode(0600)
-
-		f, err := w.CreateHeader(header)
-		if err != nil {
-			log.WithFields(logrus.Fields{
-				"error": err.Error(),
-				"id":    job.ID,
-				"file":  file.Name,
-			}).Error("Failed to create file in zip archive")
-			return err
-		}
-		_, err = f.Write([]byte(file.Body))
-		if err != nil {
-			log.WithFields(logrus.Fields{
-				"error": err.Error(),
-				"id":    job.ID,
-				"file":  file.Name,
-			}).Error("Failed to write file to zip archive")
-			return err
-		}
-	}
-
-	err = w.Close()
+	err = zip.Close()
 	if err != nil {
 		log.WithFields(logrus.Fields{
-			"error": err.Error(),
-			"id":    job.ID,
-		}).Error("Failed to create zip archive")
+			"error":   err.Error(),
+			"id":      job.ID,
+			"zipFile": zipFile,
+		}).Error("Failed to close zip file")
 		return err
 	}
 
-	job.RawData = buf.Bytes()
+	job.RawData, err = ioutil.ReadFile(zipFile)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"error":   err.Error(),
+			"id":      job.ID,
+			"zipFile": zipFile,
+		}).Error("Failed to read zip file")
+		return err
+	}
 
 	log.WithFields(logrus.Fields{
-		"id": job.ID,
+		"id":      job.ID,
+		"zipFile": zipFile,
 	}).Info("Successfully created zip archive")
 
 	return nil
