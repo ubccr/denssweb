@@ -113,7 +113,7 @@ func SubmitHandler(ctx *app.AppContext) http.Handler {
 				}
 			}
 
-			job, err := submitJob(ctx, inputData, r.FormValue("dmax"), r.FormValue("name"))
+			job, err := submitJob(ctx, inputData, r)
 
 			if err == nil {
 				http.Redirect(w, r, job.URL(), 302)
@@ -130,12 +130,12 @@ func SubmitHandler(ctx *app.AppContext) http.Handler {
 	})
 }
 
-func submitJob(ctx *app.AppContext, data []byte, dmax, name string) (*model.Job, error) {
+func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, error) {
 	if len(data) == 0 {
 		return nil, errors.New("Please provide an input data file")
 	}
 
-	d, err := strconv.ParseFloat(dmax, 64)
+	dmax, err := strconv.ParseFloat(r.FormValue("dmax"), 64)
 	if err != nil {
 		return nil, errors.New("Please provide a float for the maximum particle dimension")
 	}
@@ -168,11 +168,38 @@ func submitJob(ctx *app.AppContext, data []byte, dmax, name string) (*model.Job,
 		}
 	}
 
+	name := r.FormValue("name")
 	if len(name) > 255 {
 		return nil, errors.New("Job name must be less than 255 characters")
 	}
 
-	job := &model.Job{InputData: data, Dmax: d, Name: name}
+	job := &model.Job{InputData: data, Dmax: dmax, Name: name}
+
+	// Set optional parameters
+	job.NumSamples, err = parseInt(r.FormValue("num_samples"), "Samples")
+	if err != nil {
+		return nil, err
+	}
+	job.Oversampling, err = parseFloat(r.FormValue("oversampling"), "Oversampling")
+	if err != nil {
+		return nil, err
+	}
+	job.VoxelSize, err = parseFloat(r.FormValue("voxel_size"), "Voxel Size")
+	if err != nil {
+		return nil, err
+	}
+	job.Electrons, err = parseInt(r.FormValue("electrons"), "Electrons")
+	if err != nil {
+		return nil, err
+	}
+	job.MaxSteps, err = parseInt(r.FormValue("max_steps"), "Max Steps")
+	if err != nil {
+		return nil, err
+	}
+	job.MaxRuns, err = parseInt(r.FormValue("max_runs"), "Max Runs")
+	if err != nil {
+		return nil, err
+	}
 
 	err = model.QueueJob(ctx.DB, job)
 	if err != nil {
@@ -182,7 +209,45 @@ func submitJob(ctx *app.AppContext, data []byte, dmax, name string) (*model.Job,
 		return nil, errors.New("Failed to submit job. Please contact system administrator")
 	}
 
+	log.WithFields(log.Fields{
+		"ID":           job.ID,
+		"URL":          job.URL(),
+		"Dmax":         job.Dmax,
+		"NumSamples":   job.NumSamples,
+		"Oversampling": job.Oversampling,
+		"VoxelSize":    job.VoxelSize,
+		"Electrons":    job.Electrons,
+		"MaxSteps":     job.MaxSteps,
+		"MaxRuns":      job.MaxRuns,
+	}).Info("Job queued successfully")
+
 	return job, nil
+}
+
+func parseFloat(n, label string) (float64, error) {
+	if n == "" {
+		return float64(0.0), nil
+	}
+
+	f, err := strconv.ParseFloat(n, 64)
+	if err != nil {
+		return float64(0.0), fmt.Errorf("Please provide a float for %s", label)
+	}
+
+	return f, nil
+}
+
+func parseInt(n, label string) (int64, error) {
+	if n == "" {
+		return int64(0), nil
+	}
+
+	i, err := strconv.Atoi(n)
+	if err != nil {
+		return int64(0), fmt.Errorf("Please provide an integer for %s", label)
+	}
+
+	return int64(i), nil
 }
 
 func DensityMapHandler(ctx *app.AppContext) http.Handler {

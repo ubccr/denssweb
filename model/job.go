@@ -85,7 +85,7 @@ type Job struct {
 	// More samples means greater resolution. This is calculated by DENSS, it's
 	// not given to DENSS but we want to control the speed of calcuation so we
 	// use this parameter to determine the voxel size.
-	NumSamples int `db:"num_samples" json:"-"`
+	NumSamples int64 `db:"num_samples" json:"-"`
 
 	// Oversampling size
 	Oversampling float64 `db:"oversampling" json:"-"`
@@ -163,22 +163,33 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 	now := time.Now()
 	job.Submitted = &now
 
-	if job.Dmax <= 0 {
-		job.Dmax = 50.0
-	}
-
-	// XXX In future versions these will be adjustable parameters. For now we
-	// hard code them
 	job.Task = "Not started"
 	job.PercentComplete = 0
 	job.LogMessage = ""
 	job.Token = randToken()
-	job.Oversampling = 2.0
-	job.Electrons = 10000
-	job.MaxSteps = 3000
-	job.MaxRuns = 20
-	job.NumSamples = 31
-	job.VoxelSize = (job.Dmax * job.Oversampling) / float64(job.NumSamples)
+
+	// Set default values for params
+	if job.Dmax <= 0 {
+		job.Dmax = 50.0
+	}
+	if job.Oversampling <= 0 {
+		job.Oversampling = 2.0
+	}
+	if job.Electrons <= 0 {
+		job.Electrons = 10000
+	}
+	if job.MaxSteps <= 0 {
+		job.MaxSteps = 3000
+	}
+	if job.MaxRuns <= 0 {
+		job.MaxRuns = 20
+	}
+	if job.NumSamples <= 0 {
+		job.NumSamples = 31
+	}
+	if job.VoxelSize <= 0 {
+		job.VoxelSize = (job.Dmax * job.Oversampling) / float64(job.NumSamples)
+	}
 
 	res, err := tx.NamedExec(`
         insert into job (
