@@ -170,7 +170,7 @@ func processJob(ctx *app.AppContext, job *model.Job, threads int) error {
 		"id": job.ID,
 	}).Info("Creating zip archive")
 	model.LogJobMessage(ctx.DB, job, "Creating ZIP", "Building zip archive of raw data", 95)
-	err = createZIP(log, job, workDir)
+	err = createZIP(job, workDir)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err.Error(),
@@ -220,6 +220,20 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 
 		err = processJob(ctx, job, maxThreads)
 		if err != nil {
+			// create zip of logs if job failed
+			workDir := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss-%d", job.ID))
+
+			logrus.WithFields(logrus.Fields{
+				"id": job.ID,
+			}).Info("Creating zip archive for failed job")
+			zerr := createZIP(job, workDir)
+			if zerr != nil {
+				logrus.WithFields(logrus.Fields{
+					"error": zerr.Error(),
+					"id":    job.ID,
+				}).Error("Failed to create zip archive for failed job")
+			}
+
 			cerr := model.CompleteJob(ctx.DB, job, model.StatusError)
 			if cerr != nil {
 				logrus.WithFields(logrus.Fields{
