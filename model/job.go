@@ -111,6 +111,9 @@ type Job struct {
 
 	// Time the job completed
 	Completed *time.Time `db:"completed" json:"-"`
+
+	// Current running/wait time for the job. Only used in json
+	Time string `db:"-" json:"time"`
 }
 
 func (j *Job) URL() string {
@@ -118,29 +121,41 @@ func (j *Job) URL() string {
 }
 
 func (j *Job) RunTime() string {
+	wt := ""
+
 	if j.Started == nil {
-		return ""
+		return wt
+	} else if j.Completed != nil {
+		wt = humanize.RelTime(*j.Started, *j.Completed, "", "")
+	} else {
+		now := time.Now()
+		wt = humanize.RelTime(*j.Started, now, "", "")
 	}
 
-	if j.Completed != nil {
-		return humanize.RelTime(*j.Started, *j.Completed, "", "")
+	if wt == "now" {
+		wt = "0 seconds"
 	}
 
-	now := time.Now()
-	return humanize.RelTime(*j.Started, now, "", "")
+	return wt
 }
 
 func (j *Job) WaitTime() string {
+	wt := ""
+
 	if j.Submitted == nil {
-		return ""
+		return wt
+	} else if j.Started != nil {
+		wt = humanize.RelTime(*j.Submitted, *j.Started, "", "")
+	} else {
+		now := time.Now()
+		wt = humanize.RelTime(*j.Submitted, now, "", "")
 	}
 
-	if j.Started != nil {
-		return humanize.RelTime(*j.Submitted, *j.Started, "", "")
+	if wt == "now" {
+		wt = "0 seconds"
 	}
 
-	now := time.Now()
-	return humanize.RelTime(*j.Submitted, now, "", "")
+	return wt
 }
 
 // Fetch job by token. This is used for displaying the Job status in the web
@@ -312,6 +327,58 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
 	}
 
 	return &job, nil
+}
+
+// Fetch all jobs by status
+func FetchAllJobs(db *sqlx.DB, status, limit, offset int) ([]*Job, error) {
+	jobs := []*Job{}
+
+	args := make([]interface{}, 0)
+	query := `
+        select
+			j.id,
+			j.status_id,
+			s.status,
+            j.name,
+            j.token,
+            j.dmax,
+            j.oversampling,
+            j.num_samples,
+            j.electrons,
+            j.max_steps,
+            j.max_runs,
+            j.voxel_size,
+            j.submitted,
+            j.started,
+            j.completed
+        from job as j 
+        join job_status s on s.id = j.status_id`
+
+	if status > 0 {
+		query += ` where j.status_id = ?`
+		args = append(args, status)
+		if status == StatusComplete {
+			query += ` order by j.completed desc`
+		} else if status == StatusRunning {
+			query += ` order by j.started desc`
+		} else if status == StatusError {
+			query += ` order by j.completed desc`
+		} else {
+			query += ` order by j.submitted desc`
+		}
+	} else {
+		query += ` order by j.submitted desc`
+	}
+
+	query += ` limit ? offset ?`
+	args = append(args, limit, offset)
+
+	err := db.Select(&jobs, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return jobs, nil
 }
 
 // Complete Job

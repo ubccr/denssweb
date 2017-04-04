@@ -78,4 +78,22 @@ func TestJob(t *testing.T) {
 	if jobx.StatusID != StatusComplete {
 		t.Errorf("Incorrect job status: got %d should be %d", jobx.StatusID, StatusComplete)
 	}
+
+	jobs, err := FetchAllJobs(db, StatusComplete, 10, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(jobs) != 1 {
+		t.Errorf("Incorrect number of jobs: got %d should be %d", len(jobs), 1)
+	}
+
+	jobs, err = FetchAllJobs(db, StatusError, 10, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(jobs) != 0 {
+		t.Errorf("Incorrect number of jobs: got %d should be %d", len(jobs), 0)
+	}
 }

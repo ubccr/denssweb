@@ -1,0 +1,45 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>Jobs</h1>
+</div>
+
+
+<div class="row">
+{{ range $j := .jobs }}
+<div class="col-sm-3 col-md-3">
+    <div class="thumbnail">
+	{{ if eq $j.Status "Complete" }}
+		<a href="{{ $j.URL }}"><img src="{{ $j.URL }}/fsc.png" alt="{{ $j.Name }}"></a>
+	{{ else if eq $j.Status "Running" }}
+		<a href="{{ $j.URL }}"><img src="/static/images/job-running.png" alt="{{ $j.Name }}"></a>
+	{{ else if eq $j.Status "Error" }}
+		<a href="{{ $j.URL }}"><img src="/static/images/job-failed.png" alt="{{ $j.Name }}"></a>
+	{{ else }}
+		<a href="{{ $j.URL }}"><img src="/static/images/job-pending.png" alt="{{ $j.Name }}"></a>
+	{{ end }}
+    <div class="caption">
+        <h4>{{ if $j.Name }}{{ $j.Name }}{{ else }}DENSS Job {{ $j.ID }}{{ end }}</h4>
+		{{ if eq $j.Status "Complete" }}
+			<p>{{ $j.Completed.Local.Format "2006/01/02" }} </p>
+            <p><span class="label label-success">{{ $j.Status }} {{ $j.RunTime }}</span></p>
+		{{ else if eq $j.Status "Running" }}
+			<p>{{ $j.Started.Local.Format "2006/01/02" }} </p>
+            <p><span class="label label-warning">{{ $j.Status }} {{ $j.RunTime }}</span></p>
+		{{ else if eq $j.Status "Error" }}
+			<p>{{ $j.Completed.Local.Format "2006/01/02" }} </p>
+            <p><span class="label label-danger">{{ $j.Status }} {{ $j.RunTime }}</span></p>
+		{{ else }}
+			<p>{{ $j.Submitted.Local.Format "2006/01/02" }} </p>
+            <p><span class="label label-info">{{ $j.Status }} {{ $j.WaitTime }}</span></p>
+		{{ end }}
+    </div>
+    </div>
+</div>
+{{ else }}
+<div class="col-sm-12 col-md-12">
+      <p>No Jobs found</p>
+</div>
+{{ end }}
+</div>
+
+{{end}}

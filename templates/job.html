@@ -39,11 +39,11 @@
 {{ else if or (eq .job.Status "Running") ( eq .job.Status "Pending") }}
     {{ if eq .job.Status "Running" }}
     <div class="alert alert-warning" role="alert">
-        <strong id="status">Running {{ .job.RunTime }}</strong> Your job started on {{ .job.Started.Local.Format "2006/01/02 15:04:05 EST" }}
+        <strong><span id="status">Running</span> <span id="time">{{ .job.RunTime }}</span></strong> Your job started on {{ .job.Started.Local.Format "2006/01/02 15:04:05 EST" }}
     </div>
     {{ else }}
     <div class="alert alert-info" role="alert">
-        <strong id="status">Pending {{ .job.WaitTime }}</strong> Your job was submitted on {{ .job.Submitted.Local.Format "2006/01/02 15:04:05 EST" }}
+        <strong><span id="status">Pending</span> <span id="time">{{ .job.WaitTime }}</span></strong> Your job was submitted on {{ .job.Submitted.Local.Format "2006/01/02 15:04:05 EST" }}
     </div>
     {{ end }}    
     <div id="job-status">
@@ -65,8 +65,9 @@ function updateJobStatus() {
         $('.progress-bar').css('width', percent+'%').attr('aria-valuenow', percent);
 		$('#pct').text(percent + '% Complete');
 		$('#task').text(data['task']);
+        $('#time').text(data['time']);
         $('#log').text(data['log_message']);
-		if (data['status'] == $('#status').text()) {
+		if (data["status"] == $('#status').text()) {
 			setTimeout(function() {
 				updateJobStatus();
 			}, 2000);
@@ -84,6 +85,7 @@ $(function() {
 {{ else if eq .job.Status "Error" }}
     <div class="alert alert-danger" role="alert">
         <strong>Failed</strong> Your job failed on {{ .job.Completed.Local.Format "2006/01/02 15:04:05 EST" }}
+        &nbsp;&nbsp;&nbsp;<a class="btn btn-primary" href="{{ .job.URL }}/denss-{{ .job.ID }}-output.zip">Download Results</a>
     </div>
     <p id="task" class="lead">{{ .job.Task }}</p>
     <pre id="log">{{ .job.LogMessage }}</pre>

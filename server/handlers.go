@@ -51,6 +51,31 @@ func AboutHandler(ctx *app.AppContext) http.Handler {
 	})
 }
 
+func JobListHandler(ctx *app.AppContext) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		status, _ := strconv.Atoi(r.FormValue("status"))
+		offset, _ := strconv.Atoi(r.FormValue("offset"))
+		if offset <= 0 {
+			offset = 0
+		}
+
+		jobs, err := model.FetchAllJobs(ctx.DB, status, 20, offset)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"err": err,
+			}).Error("Failed to fetch jobs from db")
+			ctx.RenderError(w, http.StatusInternalServerError)
+			return
+		}
+
+		vars := map[string]interface{}{
+			"offset": offset,
+			"status": status,
+			"jobs":   jobs}
+		ctx.RenderTemplate(w, "job-list.html", vars)
+	})
+}
+
 func JobHandler(ctx *app.AppContext) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := mux.Vars(r)["id"]
@@ -364,6 +389,12 @@ func StatusHandler(ctx *app.AppContext) http.Handler {
 			}
 
 			return
+		}
+
+		if job.StatusID == model.StatusPending {
+			job.Time = job.WaitTime()
+		} else {
+			job.Time = job.RunTime()
 		}
 
 		out, err := json.Marshal(job)
