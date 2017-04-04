@@ -3,6 +3,24 @@
     <h1>Jobs</h1>
 </div>
 
+<nav>
+  <ul class="pagination">
+    <li>
+        <a href="/jobs?status={{ .status }}&amp;offset={{ .prev }}" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>
+    <li role="presentation"{{ if eq .status 1 }} class="active"{{end}}><a href="/jobs?status=1">Pending</a></li>
+	<li role="presentation"{{ if eq .status 2 }} class="active"{{end}}><a href="/jobs?status=2">Running</a></li>
+	<li role="presentation"{{ if eq .status 3 }} class="active"{{end}}><a href="/jobs?status=3">Completed</a></li>
+	<li role="presentation"{{ if eq .status 4 }} class="active"{{end}}><a href="/jobs?status=4">Error</a></li>
+    <li>
+        <a href="/jobs?status={{ .status }}&amp;offset={{ .next }}" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>
+  </ul>
+</nav>
 
 <div class="row">
 {{ range $j := .jobs }}

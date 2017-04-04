@@ -59,6 +59,12 @@ func JobListHandler(ctx *app.AppContext) http.Handler {
 			offset = 0
 		}
 
+		prev := offset - 20
+		if prev <= 0 {
+			prev = 0
+		}
+		next := offset + 20
+
 		jobs, err := model.FetchAllJobs(ctx.DB, status, 20, offset)
 		if err != nil {
 			log.WithFields(log.Fields{
@@ -70,6 +76,8 @@ func JobListHandler(ctx *app.AppContext) http.Handler {
 
 		vars := map[string]interface{}{
 			"offset": offset,
+			"prev":   prev,
+			"next":   next,
 			"status": status,
 			"jobs":   jobs}
 		ctx.RenderTemplate(w, "job-list.html", vars)
