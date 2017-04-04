@@ -64,9 +64,14 @@
 # eman2dir:  "/usr/local/EMAN2"
 
 #------------------------------------------------------------------------------
-# Path to fsc-chart.py
+# Path to denssweb-fsc-chart.py
 #------------------------------------------------------------------------------
-# fsc_path:  "/usr/local/bin/fsc-chart.py"
+# fsc_path:  "/usr/local/bin/denssweb-fsc-chart.py"
+
+#------------------------------------------------------------------------------
+# Path to denssweb-summary-chart.py
+#------------------------------------------------------------------------------
+# summary_path:  "/usr/local/bin/denssweb-summary-chart.py"
 
 #------------------------------------------------------------------------------
 # Maxiumum number of seconds a command can run
