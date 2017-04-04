@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )
@@ -114,6 +115,32 @@ type Job struct {
 
 func (j *Job) URL() string {
 	return fmt.Sprintf("%s/job/%s", viper.GetString("base_url"), j.Token)
+}
+
+func (j *Job) RunTime() string {
+	if j.Started == nil {
+		return ""
+	}
+
+	if j.Completed != nil {
+		return humanize.RelTime(*j.Started, *j.Completed, "", "")
+	}
+
+	now := time.Now()
+	return humanize.RelTime(*j.Started, now, "", "")
+}
+
+func (j *Job) WaitTime() string {
+	if j.Submitted == nil {
+		return ""
+	}
+
+	if j.Started != nil {
+		return humanize.RelTime(*j.Submitted, *j.Started, "", "")
+	}
+
+	now := time.Now()
+	return humanize.RelTime(*j.Submitted, now, "", "")
 }
 
 // Fetch job by token. This is used for displaying the Job status in the web
