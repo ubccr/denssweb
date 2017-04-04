@@ -80,7 +80,7 @@ namespace LiteMol.Denss {
     // Create LiteMol plugin
     let plugin = Plugin.create({
         target: '#app',
-        viewportBackground: '#fff',
+        viewportBackground: '#191919',
         layoutState: {
             hideControls: true,
             isExpanded: false
