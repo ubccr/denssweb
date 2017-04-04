@@ -153,9 +153,14 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	reader := bytes.NewReader(data)
 	scanner := bufio.NewScanner(reader)
 	lineno := 0
+	isEmpty := true
 	for scanner.Scan() {
 		lineno++
 		line := scanner.Text()
+		if line == "" {
+			// skip blank lines
+			continue
+		}
 		parts := strings.Fields(line)
 		if len(parts) != 3 {
 			return nil, fmt.Errorf("Invalid input data format: error on line %d", lineno)
@@ -165,7 +170,12 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 			if err != nil {
 				return nil, fmt.Errorf("Invalid floating point numbers found on line %d", lineno)
 			}
+			isEmpty = false
 		}
+	}
+
+	if isEmpty {
+		return nil, errors.New("Input data file was empty")
 	}
 
 	name := r.FormValue("name")
