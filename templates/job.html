@@ -7,16 +7,14 @@
         DENSS Job {{ .job.ID }}
     {{ end }}
     </h1>
+    <a href="{{ .job.URL }}">{{ .job.URL }}</a>
 </div>
-
-<p>
-URL: <a href="{{ .job.URL }}">{{ .job.URL }}</a> {{ if eq .job.Status "Complete" }}| Download Results: <a href="{{ .job.URL }}/denss-{{ .job.ID }}-output.zip">denss-{{ .job.ID }}-output.zip</a>  {{ end }}
-</p>
 
 {{ if eq .job.Status "Complete" }}
     <script src="/static/js/LiteMol-plugin.js?lmversion=14"></script>
     <div class="alert alert-success" role="alert">
-        <strong>Completed in {{ .job.RunTime }}</strong> Your job was completed at {{ .job.Completed.Local.Format "15:04:05 EST on Jan 02, 2006" }}
+        <strong>Completed in {{ .job.RunTime }}</strong> Your job completed on {{ .job.Completed.Local.Format "2006/01/02 15:04:05 EST" }}
+        &nbsp;&nbsp;&nbsp;<a class="btn btn-primary" href="{{ .job.URL }}/denss-{{ .job.ID }}-output.zip">Download Results</a>
     </div>
     <div class="page-header">Electron Density Map</div>
     <div class="row">
@@ -41,11 +39,11 @@ URL: <a href="{{ .job.URL }}">{{ .job.URL }}</a> {{ if eq .job.Status "Complete"
 {{ else if or (eq .job.Status "Running") ( eq .job.Status "Pending") }}
     {{ if eq .job.Status "Running" }}
     <div class="alert alert-warning" role="alert">
-        <strong id="status">Running {{ .job.RunTime }}</strong> Your job was started at {{ .job.Started.Local.Format "15:04:05 EST on Jan 02, 2006" }}
+        <strong id="status">Running {{ .job.RunTime }}</strong> Your job started on {{ .job.Started.Local.Format "2006/01/02 15:04:05 EST" }}
     </div>
     {{ else }}
     <div class="alert alert-info" role="alert">
-        <strong id="status">Pending {{ .job.WaitTime }}</strong> Your job was submitted at {{ .job.Submitted.Local.Format "15:04:05 EST on Jan 02, 2006" }}
+        <strong id="status">Pending {{ .job.WaitTime }}</strong> Your job was submitted on {{ .job.Submitted.Local.Format "2006/01/02 15:04:05 EST" }}
     </div>
     {{ end }}    
     <div id="job-status">
@@ -85,7 +83,7 @@ $(function() {
     </script>
 {{ else if eq .job.Status "Error" }}
     <div class="alert alert-danger" role="alert">
-        <strong>Failed</strong> Your job failed at {{ .job.Completed.Local.Format "15:04:05 EST on Jan 02, 2006" }}
+        <strong>Failed</strong> Your job failed on {{ .job.Completed.Local.Format "2006/01/02 15:04:05 EST" }}
     </div>
     <p id="task" class="lead">{{ .job.Task }}</p>
     <pre id="log">{{ .job.LogMessage }}</pre>
