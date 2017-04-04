@@ -36,15 +36,13 @@ make_release(){
 
     if [ "$GOOS" == "windows" ]; then
         cp ./denssweb.exe ${REL_DIR}/ 
-        cd ${DENSSWEB_DIR}
-        zip -r ${NAME}.zip ${NAME}
-        mv ${NAME}.zip ../
     else
         cp ./denssweb ${REL_DIR}/ 
-        cd ${DENSSWEB_DIR}
-        tar cvzf ${NAME}.tar.gz ${NAME}
-        mv ${NAME}.tar.gz ../
     fi
+
+    cd ${DENSSWEB_DIR}
+    zip -r ${NAME}.zip ${NAME}
+    mv ${NAME}.zip ../
     cd ../
     rm -Rf ${DENSSWEB_DIR}
     rm -f ./denssweb
