@@ -117,7 +117,7 @@ var LiteMol;
         // Create LiteMol plugin
         var plugin = Plugin.create({
             target: '#app',
-            viewportBackground: '#191919',
+            viewportBackground: '#eee',
             layoutState: {
                 hideControls: true,
                 isExpanded: false
