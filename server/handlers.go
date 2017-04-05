@@ -190,6 +190,7 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	for scanner.Scan() {
 		lineno++
 		line := scanner.Text()
+		line = strings.TrimSpace(line)
 		if line == "" {
 			// skip blank lines
 			continue
