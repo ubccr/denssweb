@@ -21,4 +21,5 @@ body {
 #app {
     position: relative;
     height: 480px;
-}    
+    z-index: 1000;
+}
