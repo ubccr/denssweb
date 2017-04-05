@@ -54,12 +54,13 @@ def fsc_plot(in_file, out_file):
         fig, ax = plt.subplots()
 
         ax.plot(x, y)
-        ax.text(0.8, 0.9, r'$r={:.3f} \AA$'.format(resolution), transform=ax.transAxes)
+        ax.text(0.6, 0.9, r'$Resolution={:.3f} \AA$'.format(resolution), fontsize=14, transform=ax.transAxes)
 
         plt.axhline(0.5, color='#444444', linewidth=1, linestyle='dashed')
         plt.axhline(0.143, color='#444444', linewidth=1, linestyle='dashed')
         plt.xlabel(r'Resolution (1/$\AA$)')
         plt.ylabel('FSC')
+        plt.title('Fourier Shell Correlation Curve')
         plt.savefig(out_file, format='png', bbox_inches="tight", pad_inches=0.5)
 
 def main():
