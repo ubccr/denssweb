@@ -18,8 +18,6 @@
 package server
 
 import (
-	"bufio"
-	"bytes"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -27,7 +25,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
@@ -168,48 +165,30 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		return nil, errors.New("Please provide an input data file")
 	}
 
-	dmax, err := strconv.ParseFloat(r.FormValue("dmax"), 64)
-	if err != nil {
-		return nil, errors.New("Please provide a float for the maximum particle dimension")
-	}
+	dmax := float64(0)
 
-	// Validate input file
-	// TODO add GNOM support
-	contentType := http.DetectContentType(data)
-	if !strings.HasPrefix(contentType, "text/plain") {
-		log.WithFields(log.Fields{
-			"contentType": contentType,
-		}).Error("Invalid input file uploaded")
-		return nil, fmt.Errorf("Invalid input data. Please provide an ascii text file")
-	}
-
-	reader := bytes.NewReader(data)
-	scanner := bufio.NewScanner(reader)
-	lineno := 0
-	isEmpty := true
-	for scanner.Scan() {
-		lineno++
-		line := scanner.Text()
-		line = strings.TrimSpace(line)
-		if line == "" {
-			// skip blank lines
-			continue
+	if version, err := parseGNOMHeader(data); err == nil {
+		// Convert GNOM to DAT
+		dat, dm, err := convertGNOM(data, version)
+		if err != nil {
+			return nil, err
 		}
-		parts := strings.Fields(line)
-		if len(parts) != 3 {
-			return nil, fmt.Errorf("Invalid input data format: error on line %d", lineno)
-		}
-		for _, n := range parts {
-			_, err := strconv.ParseFloat(n, 64)
-			if err != nil {
-				return nil, fmt.Errorf("Invalid floating point numbers found on line %d", lineno)
-			}
-			isEmpty = false
+		data = dat
+		dmax = dm
+	} else {
+		// Check 3-column DAT file
+		err := validateDAT(data)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	if isEmpty {
-		return nil, errors.New("Input data file was empty")
+	if dmax == 0 {
+		var err error
+		dmax, err = strconv.ParseFloat(r.FormValue("dmax"), 64)
+		if err != nil {
+			return nil, errors.New("Please provide a float for the maximum particle dimension")
+		}
 	}
 
 	name := r.FormValue("name")
@@ -220,6 +199,7 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	job := &model.Job{InputData: data, Dmax: dmax, Name: name}
 
 	// Set optional parameters
+	var err error
 	job.NumSamples, err = parseInt(r.FormValue("num_samples"), "Samples")
 	if err != nil {
 		return nil, err
