@@ -10,6 +10,7 @@ ChangeLog
 * Add more optional DENSS parameters 
 * Allow blank lines in the input file
 * Add job list page
+* Add support for parsing GNOM input files
 
 
 `v0.0.1`_ (2017-03-22)
