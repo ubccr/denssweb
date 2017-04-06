@@ -122,7 +122,7 @@ func convertGNOM(data []byte, version float64) ([]byte, float64, error) {
 	lineno := 0
 	dmax := float64(0)
 	headerFound := false
-    // Scan for scattering data header and Dmax (if v5)
+	// Scan for scattering data header and Dmax (if v5)
 	for scanner.Scan() {
 		lineno++
 		line := scanner.Text()
@@ -139,8 +139,8 @@ func convertGNOM(data []byte, version float64) ([]byte, float64, error) {
 	}
 
 	records := [][]string{}
-    // At the beginning the extrapolated data is only 2 columns. So we use the
-    // first error (3rd column) value we see and use it to fill in the missing data
+	// At the beginning the extrapolated data is only 2 columns. So we use the
+	// first error (3rd column) value we see and use it to fill in the missing data
 	firstValueFor3rdColumn := ""
 	for scanner.Scan() {
 		lineno++

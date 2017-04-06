@@ -112,7 +112,7 @@ func SubmitHandler(ctx *app.AppContext) http.Handler {
 
 		if r.Method == "POST" {
 			r.Body = http.MaxBytesReader(w, r.Body, MaxFileSize)
-			err := r.ParseMultipartForm(4096)
+			err := r.ParseMultipartForm(MaxFileSize)
 			if err != nil {
 				log.WithFields(log.Fields{
 					"err": err,
