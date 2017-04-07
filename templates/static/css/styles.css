@@ -20,6 +20,7 @@ body {
 
 #app {
     position: relative;
+    border: 1px solid #ccc;
     height: 480px;
     z-index: 1000;
 }
