@@ -75,7 +75,6 @@ DENSSWeb requires the following software
 
 * `DENSS <https://github.com/tdgrant1/denss>`_
 * `EMAN2 <https://github.com/cryoem/eman2>`_
-* `Situs <http://situs.biomachina.org>`_
 
 The following guide assumes you're running Linux Ubuntu 16.04. You will need to
 adjust package names for your distro.
@@ -130,22 +129,8 @@ Setup env variables in ~/.bashrc::
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMAN2DIR/lib
     export PYTHONPATH=$PYTHONPATH:$EMAN2DIR/lib
 
-Installing Situs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can fetch Situs source from `here <http://situs.biomachina.org/>`_. Only
-really need the map2map command. 
-
-Compile and install::
-
-    $ tar xvzf Situs_2.8.tar
-    $ cd src
-    $ make
-    $ make install
-
 ------------------------------------------------------------------------
 License
 ------------------------------------------------------------------------
 
 DENSSWeb is released under the GPLv3 license. See the LICENSE file.
-
