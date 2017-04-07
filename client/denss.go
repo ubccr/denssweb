@@ -129,16 +129,7 @@ func runDenss(log *logrus.Logger, job *model.Job, workDir string) error {
 	log.WithFields(logrus.Fields{
 		"id":      job.ID,
 		"maxRuns": job.MaxRuns,
-	}).Info("denss.py runs completed. converting to mrc")
-
-	// All denss.py process finished successfully. Need to convert xplor output
-	// files to mrc using map2map
-	for i := 0; i < maxRuns; i++ {
-		err := convertToMRC(log, job, workDir, i)
-		if err != nil {
-			return err
-		}
-	}
+	}).Info("denss.py runs completed successfully")
 
 	return nil
 }
