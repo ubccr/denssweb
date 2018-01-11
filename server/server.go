@@ -18,8 +18,10 @@
 package server
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
@@ -66,15 +68,42 @@ func middleware(ctx *app.AppContext) *negroni.Negroni {
 func RunServer(ctx *app.AppContext) {
 	mw := middleware(ctx)
 
-	log.Printf("Running on http://%s:%d", viper.GetString("bind"), viper.GetInt("port"))
+	srv := &http.Server{
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		Addr:         fmt.Sprintf("%s:%d", viper.GetString("bind"), viper.GetInt("port")),
+		Handler:      mw,
+	}
 
 	certFile := viper.GetString("cert")
 	keyFile := viper.GetString("key")
 
 	if certFile != "" && keyFile != "" {
-		log.Warn("SSL/TLS enabled. HTTP communication will be encrypted")
-		http.ListenAndServeTLS(fmt.Sprintf("%s:%d", viper.GetString("bind"), viper.GetInt("port")), certFile, keyFile, mw)
+		cfg := &tls.Config{
+			MinVersion: tls.VersionTLS12,
+			CurvePreferences: []tls.CurveID{
+				tls.CurveP256,
+				tls.X25519,
+			},
+			PreferServerCipherSuites: true,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			},
+		}
+
+		srv.TLSConfig = cfg
+
+		log.Printf("Running on https://%s:%d", viper.GetString("bind"), viper.GetInt("port"))
+		log.Fatal(srv.ListenAndServeTLS(certFile, keyFile))
 	} else {
-		http.ListenAndServe(fmt.Sprintf("%s:%d", viper.GetString("bind"), viper.GetInt("port")), mw)
+		log.Warn("**WARNING*** SSL/TLS not enabled. HTTP communication will not be encrypted and vulnerable to snooping.")
+		log.Printf("Running on http://%s:%d", viper.GetString("bind"), viper.GetInt("port"))
+		log.Fatal(srv.ListenAndServe())
 	}
 }
