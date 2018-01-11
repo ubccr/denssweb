@@ -227,7 +227,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 		job.MaxRuns = 20
 	}
 	if job.NumSamples <= 0 {
-		job.NumSamples = 31
+		job.NumSamples = 33
 	}
 	if job.VoxelSize <= 0 {
 		job.VoxelSize = (job.Dmax * job.Oversampling) / float64(job.NumSamples)
