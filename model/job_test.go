@@ -33,7 +33,9 @@ func TestJob(t *testing.T) {
 		t.Error(err)
 	}
 
-	job := &Job{InputData: []byte("test")}
+	email := "test@example.com"
+
+	job := &Job{Email: email, InputData: []byte("test")}
 	err = QueueJob(db, job)
 	if err != nil {
 		t.Fatal(err)
@@ -46,6 +48,10 @@ func TestJob(t *testing.T) {
 
 	if jobx.ID != job.ID {
 		t.Errorf("Incorrect job ID: got %d should be %d", jobx.ID, job.ID)
+	}
+
+	if jobx.Email != email {
+		t.Errorf("Incorrect job Email: got %s should be %s", jobx.Email, email)
 	}
 
 	jobx, err = FetchNextPending(db)

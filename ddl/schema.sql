@@ -7,6 +7,7 @@ CREATE TABLE `job` (
     `percent_complete` int(11)           NOT NULL,
     `log_message`      mediumtext        NOT NULL,
     `token`            varchar(255)      NOT NULL,
+    `email`            varchar(255)      NOT NULL,
     `input_data`       mediumblob        NOT NULL,
     `density_map`      mediumblob        NULL,
     `fsc_chart`        mediumblob        NULL,

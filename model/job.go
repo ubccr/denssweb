@@ -41,6 +41,9 @@ type Job struct {
 	// Unique ID for the Job
 	ID int64 `db:"id" json:"id"`
 
+	// Email Address
+	Email string `db:"email" json:"-"`
+
 	// Unique Job token
 	Token string `db:"token" json:"-"`
 
@@ -172,6 +175,7 @@ func FetchJob(db *sqlx.DB, token string) (*Job, error) {
             j.log_message,
             j.name,
             j.token,
+            j.email,
             j.dmax,
             j.name,
             j.oversampling,
@@ -242,6 +246,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
             input_data,
             name,
             token,
+            email,
             dmax,
             num_samples,
             oversampling,
@@ -258,6 +263,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
             :input_data,
             :name,
             :token,
+            :email,
             :dmax,
             :num_samples,
             :oversampling,
@@ -295,6 +301,7 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
             j.input_data,
             j.name,
             j.token,
+            j.email,
             j.dmax,
             j.oversampling,
             j.num_samples,
@@ -341,6 +348,7 @@ func FetchAllJobs(db *sqlx.DB, status, limit, offset int) ([]*Job, error) {
 			s.status,
             j.name,
             j.token,
+            j.email,
             j.dmax,
             j.oversampling,
             j.num_samples,

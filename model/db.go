@@ -29,7 +29,7 @@ const (
 		(id integer primary key, status_id integer, input_data blob, dmax real,
          density_map blob, fsc_chart blob, summary_chart bob, raw_data blob, oversampling real, token string,
          electrons integer, max_steps integer, max_runs integer, name string, num_samples integer,
-         task string, percent_complete integer, log_message string,
+         task string, percent_complete integer, log_message string, email string,
          voxel_size real, submitted datetime, started datetime, completed datetime)
 	`
 	JobStatusSchema = `

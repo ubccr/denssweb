@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/mail"
 	"strconv"
 
 	log "github.com/Sirupsen/logrus"
@@ -196,7 +197,15 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		return nil, errors.New("Job name must be less than 255 characters")
 	}
 
-	job := &model.Job{InputData: data, Dmax: dmax, Name: name}
+	email := r.FormValue("email")
+	if len(email) > 0 {
+		_, err := mail.ParseAddress(email)
+		if err != nil {
+			return nil, errors.New("Please provide a valid email address")
+		}
+	}
+
+	job := &model.Job{InputData: data, Dmax: dmax, Name: name, Email: email}
 
 	// Set optional parameters
 	var err error
@@ -244,6 +253,18 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		"MaxSteps":     job.MaxSteps,
 		"MaxRuns":      job.MaxRuns,
 	}).Info("Job queued successfully")
+
+	if len(job.Email) > 0 {
+		err = ctx.SendEmail(job.Email, "SUBMITTED", job.URL(), job.ID)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"job_id": job.ID,
+				"email":  job.Email,
+				"url":    job.URL(),
+				"error":  err,
+			}).Info("Failed to send email")
+		}
+	}
 
 	return job, nil
 }

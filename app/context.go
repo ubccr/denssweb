@@ -33,6 +33,9 @@ import (
 )
 
 func init() {
+	viper.SetDefault("smtp_port", 25)
+	viper.SetDefault("smtp_host", "127.0.0.1")
+	viper.SetDefault("enable_notifications", false)
 	viper.SetDefault("driver", "sqlite3")
 	dbPath := "/tmp/denssweb.db"
 	wd, err := os.Getwd()
