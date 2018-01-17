@@ -11,12 +11,19 @@ runs and averages the results using EMAN2. The resulting density map is
 displayed using a custom LiteMol plugin along with a plot of the fourier shell
 correlation (FSC) curve.
 
-A demo fo DENSSWeb can be found `here <http://denss.ccr.buffalo.edu>`_.
+A demo fo DENSSWeb can be found `here <https://denss.ccr.buffalo.edu>`_.
 
 DENSSWeb can be run locally on a single machine or on multiple machines in a
 clustered environment. DENSSWeb consists of a server and client worker. The
 server runs an embedded web server and the client worker runs the DENSS
 pipeline.
+
+------------------------------------------------------------------------
+Requirements
+------------------------------------------------------------------------
+
+A web browser with WebGL support. To check if your browser supports WebGL `see
+here <https://get.webgl.org/>`_.
 
 ------------------------------------------------------------------------
 Install
