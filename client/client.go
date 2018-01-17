@@ -248,7 +248,33 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 				"url":   job.URL(),
 				"id":    job.ID,
 			}).Error("Failed to process job")
+
+			if len(job.Email) > 0 {
+				err = ctx.SendEmail(job.Email, "FAILED", job.URL(), job.ID)
+				if err != nil {
+					logrus.WithFields(logrus.Fields{
+						"job_id": job.ID,
+						"email":  job.Email,
+						"url":    job.URL(),
+						"status": "FAILED",
+						"error":  err,
+					}).Error("Failed to send email")
+				}
+			}
 			continue
+		}
+
+		if len(job.Email) > 0 {
+			err = ctx.SendEmail(job.Email, "COMPLETED", job.URL(), job.ID)
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"job_id": job.ID,
+					"email":  job.Email,
+					"url":    job.URL(),
+					"status": "COMPLETED",
+					"error":  err,
+				}).Error("Failed to send email")
+			}
 		}
 
 		model.LogJobMessage(ctx.DB, job, "Complete", "Job completed successfully", 100)

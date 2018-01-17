@@ -282,8 +282,9 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 				"job_id": job.ID,
 				"email":  job.Email,
 				"url":    job.URL(),
+				"status": "SUBMITTED",
 				"error":  err,
-			}).Info("Failed to send email")
+			}).Error("Failed to send email")
 		}
 	}
 
