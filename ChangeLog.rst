@@ -12,7 +12,9 @@ ChangeLog
 * Add job list page
 * Add support for parsing GNOM input files
 * Remove Situs dependency
-
+* Add support for CAPTCHA
+* Add email notifications
+* Add option to disable job list
 
 `v0.0.1`_ (2017-03-22)
 ---------------------------
