@@ -40,15 +40,20 @@ func execDenss(log *logrus.Logger, job *model.Job, workDir, inputFile string, th
 	args := []string{
 		"-f",
 		inputFile,
-		"-d",
-		fmt.Sprintf("%.4f", job.Dmax),
 		"--oversampling",
 		fmt.Sprintf("%.4f", job.Oversampling),
-		"--voxel",
-		fmt.Sprintf("%.4f", job.VoxelSize),
 		"-o",
 		outputPrefix,
-		"--plot-off",
+		"--plot_off",
+	}
+
+	if job.Dmax > 0 {
+		args = append(args, "-d")
+		args = append(args, fmt.Sprintf("%.4f", job.Dmax))
+	}
+	if job.VoxelSize > 0 {
+		args = append(args, "--voxel")
+		args = append(args, fmt.Sprintf("%.4f", job.VoxelSize))
 	}
 
 	log.WithFields(logrus.Fields{
@@ -79,7 +84,7 @@ func execDenss(log *logrus.Logger, job *model.Job, workDir, inputFile string, th
 // Run denss.py in parallel
 func runDenss(log *logrus.Logger, job *model.Job, workDir string) error {
 
-	inputFile := filepath.Join(workDir, "input.dat")
+	inputFile := filepath.Join(workDir, fmt.Sprintf("input.%s", job.FileType))
 	err := ioutil.WriteFile(inputFile, job.InputData, 0640)
 	if err != nil {
 		log.WithFields(logrus.Fields{

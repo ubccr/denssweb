@@ -35,7 +35,7 @@ func TestJob(t *testing.T) {
 
 	email := "test@example.com"
 
-	job := &Job{Email: email, InputData: []byte("test")}
+	job := &Job{Email: email, InputData: []byte("test"), FileType: "out"}
 	err = QueueJob(db, job)
 	if err != nil {
 		t.Fatal(err)
@@ -61,6 +61,10 @@ func TestJob(t *testing.T) {
 
 	if jobx.ID != job.ID {
 		t.Errorf("Incorrect job ID: got %d should be %d", jobx.ID, job.ID)
+	}
+
+	if jobx.FileType != job.FileType {
+		t.Errorf("Incorrect job File Type: got %d should be %d", jobx.FileType, job.FileType)
 	}
 
 	jobx, err = FetchJob(db, job.Token)

@@ -172,30 +172,30 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		return nil, errors.New("Please provide an input data file")
 	}
 
-	dmax := float64(0)
+	dmax, err := parseFloat(r.FormValue("dmax"), "Dmax")
+	if err != nil {
+		return nil, err
+	}
 
+	fileType := "out"
 	if version, err := parseGNOMHeader(data); err == nil {
-		// Convert GNOM to DAT
-		dat, dm, err := convertGNOM(data, version)
-		if err != nil {
-			return nil, err
-		}
-		data = dat
-		dmax = dm
+		log.WithFields(log.Fields{
+			"version": version,
+		}).Info("Input data appears to be GNOM")
 	} else {
 		// Check 3-column DAT file
 		err := validateDAT(data)
 		if err != nil {
 			return nil, err
 		}
-	}
+		log.Info("Input data appears to be 3-column DAT file")
 
-	if dmax == 0 {
-		var err error
-		dmax, err = strconv.ParseFloat(r.FormValue("dmax"), 64)
-		if err != nil {
+		// DAT files require Dmax
+		if dmax == 0.0 {
 			return nil, errors.New("Please provide a float for the maximum particle dimension")
 		}
+
+		fileType = "dat"
 	}
 
 	name := r.FormValue("name")
@@ -226,10 +226,9 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		}
 	}
 
-	job := &model.Job{InputData: data, Dmax: dmax, Name: name, Email: email}
+	job := &model.Job{InputData: data, Dmax: dmax, FileType: fileType, Name: name, Email: email}
 
 	// Set optional parameters
-	var err error
 	job.NumSamples, err = parseInt(r.FormValue("num_samples"), "Samples")
 	if err != nil {
 		return nil, err
@@ -266,6 +265,7 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	log.WithFields(log.Fields{
 		"ID":           job.ID,
 		"URL":          job.URL(),
+		"FileType":     job.FileType,
 		"Dmax":         job.Dmax,
 		"NumSamples":   job.NumSamples,
 		"Oversampling": job.Oversampling,

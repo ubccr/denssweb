@@ -65,6 +65,9 @@ type Job struct {
 	// Job Name
 	Name string `db:"name" json:"name"`
 
+	// File Type (dat | out)
+	FileType string `db:"file_type" json:"-"`
+
 	// Input data file (*.dat or GNOM *.out file)
 	InputData []byte `db:"input_data" json:"-"`
 
@@ -176,6 +179,7 @@ func FetchJob(db *sqlx.DB, token string) (*Job, error) {
             j.name,
             j.token,
             j.email,
+            j.file_type,
             j.dmax,
             j.name,
             j.oversampling,
@@ -215,9 +219,6 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 	job.Token = randToken()
 
 	// Set default values for params
-	if job.Dmax <= 0 {
-		job.Dmax = 50.0
-	}
 	if job.Oversampling <= 0 {
 		job.Oversampling = 2.0
 	}
@@ -247,6 +248,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
             name,
             token,
             email,
+            file_type,
             dmax,
             num_samples,
             oversampling,
@@ -264,6 +266,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
             :name,
             :token,
             :email,
+            :file_type,
             :dmax,
             :num_samples,
             :oversampling,
@@ -302,6 +305,7 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
             j.name,
             j.token,
             j.email,
+            j.file_type,
             j.dmax,
             j.oversampling,
             j.num_samples,
@@ -349,6 +353,7 @@ func FetchAllJobs(db *sqlx.DB, status, limit, offset int) ([]*Job, error) {
             j.name,
             j.token,
             j.email,
+            j.file_type,
             j.dmax,
             j.oversampling,
             j.num_samples,
@@ -488,6 +493,7 @@ func FetchRawData(db *sqlx.DB, token string) (*Job, error) {
 			j.id,
 			j.status_id,
             j.name,
+            j.file_type,
             j.raw_data,
             j.submitted,
             j.started,
