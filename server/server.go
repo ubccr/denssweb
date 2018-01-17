@@ -38,6 +38,7 @@ func init() {
 	viper.SetDefault("port", 8080)
 	viper.SetDefault("bind", "127.0.0.1")
 	viper.SetDefault("base_url", "http://localhost:8080")
+	viper.SetDefault("show_job_list", true)
 }
 
 func middleware(ctx *app.AppContext) *negroni.Negroni {
@@ -49,7 +50,11 @@ func middleware(ctx *app.AppContext) *negroni.Negroni {
 
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(fmt.Sprintf("%s/static", ctx.Tmpldir)))))
 	router.Path("/about").Handler(AboutHandler(ctx)).Methods("GET")
-	router.Path("/jobs").Handler(JobListHandler(ctx)).Methods("GET")
+
+	if viper.GetBool("show_job_list") {
+		router.Path("/jobs").Handler(JobListHandler(ctx)).Methods("GET")
+	}
+
 	router.Path("/submit").Handler(SubmitHandler(ctx)).Methods("GET", "POST")
 	router.Path(fmt.Sprintf("/job/{id:%s}", TokenRegex)).Handler(JobHandler(ctx)).Methods("GET")
 	router.Path(fmt.Sprintf("/job/{id:%s}/status", TokenRegex)).Handler(StatusHandler(ctx)).Methods("GET")
