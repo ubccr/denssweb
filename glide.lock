@@ -1,8 +1,10 @@
-hash: 9d50f20c4e5bd55edd28f31dd57c9a52683e3bf74c3fbd3c14e8eb8cbac193f7
-updated: 2017-04-04T14:12:37.437433561-04:00
+hash: 93c7aa1017328ffe405f3aa73da8c1136924b14ffd4913df5b95dee83b9338ed
+updated: 2018-01-17T11:53:33.003717426-05:00
 imports:
+- name: github.com/dchest/captcha
+  version: 6a29415a8364ec2971fdc62d9e415ed53fc20410
 - name: github.com/dustin/go-humanize
-  version: 259d2a102b871d17f30e3cd9881a642961a1e486
+  version: bb3d318650d48840a39aa21a027c6630e198e626
 - name: github.com/fsnotify/fsnotify
   version: ff7bc41d4007f67e5456703c34342df4e0113f64
 - name: github.com/go-sql-driver/mysql
@@ -23,7 +25,7 @@ imports:
   - json/scanner
   - json/token
 - name: github.com/jhoonb/archivex
-  version: b669bdadd30ace382d6e082dfcc8e33b926db1a1
+  version: be4efa7ec0c38ab76d56037014c90d48d6b13037
 - name: github.com/jmoiron/sqlx
   version: 8ed836a8adb659e8492bcaa49e0880bb84075fe2
   subpackages:

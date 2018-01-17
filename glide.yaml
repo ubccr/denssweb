@@ -12,3 +12,4 @@ import:
 - package: github.com/urfave/negroni
 - package: github.com/jhoonb/archivex
 - package: github.com/dustin/go-humanize
+- package: github.com/dchest/captcha

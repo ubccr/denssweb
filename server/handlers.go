@@ -28,7 +28,9 @@ import (
 	"strconv"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
+	"github.com/spf13/viper"
 	"github.com/ubccr/denssweb/app"
 	"github.com/ubccr/denssweb/model"
 )
@@ -157,6 +159,10 @@ func SubmitHandler(ctx *app.AppContext) http.Handler {
 		vars := map[string]interface{}{
 			"message": message}
 
+		if viper.GetBool("enable_captcha") {
+			vars["captchaID"] = captcha.New()
+		}
+
 		ctx.RenderTemplate(w, "submit.html", vars)
 	})
 }
@@ -202,6 +208,21 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		_, err := mail.ParseAddress(email)
 		if err != nil {
 			return nil, errors.New("Please provide a valid email address")
+		}
+	}
+
+	captchaID := r.FormValue("captcha_id")
+	captchaSol := r.FormValue("captcha_sol")
+	if viper.GetBool("enable_captcha") {
+		if len(captchaID) == 0 {
+			return nil, errors.New("Invalid captcha provided")
+		}
+		if len(captchaSol) == 0 {
+			return nil, errors.New("Please type in the numbers you see in the picture")
+		}
+
+		if !captcha.VerifyString(captchaID, captchaSol) {
+			return nil, errors.New("The numbers you typed in do not match the image")
 		}
 	}
 

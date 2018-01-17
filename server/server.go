@@ -24,6 +24,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 	"github.com/ubccr/denssweb/app"
@@ -39,6 +40,7 @@ func init() {
 	viper.SetDefault("bind", "127.0.0.1")
 	viper.SetDefault("base_url", "http://localhost:8080")
 	viper.SetDefault("show_job_list", true)
+	viper.SetDefault("enable_captcha", false)
 }
 
 func middleware(ctx *app.AppContext) *negroni.Negroni {
@@ -53,6 +55,9 @@ func middleware(ctx *app.AppContext) *negroni.Negroni {
 
 	if viper.GetBool("show_job_list") {
 		router.Path("/jobs").Handler(JobListHandler(ctx)).Methods("GET")
+	}
+	if viper.GetBool("enable_captcha") {
+		router.Path(fmt.Sprintf("/captcha/{cid:%s}.png", TokenRegex)).Handler(captcha.Server(captcha.StdWidth, captcha.StdHeight))
 	}
 
 	router.Path("/submit").Handler(SubmitHandler(ctx)).Methods("GET", "POST")
