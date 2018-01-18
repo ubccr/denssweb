@@ -220,7 +220,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 
 	// Set default values for params
 	if job.Oversampling <= 0 {
-		job.Oversampling = 2.0
+		job.Oversampling = 3.0
 	}
 	if job.Electrons <= 0 {
 		job.Electrons = 10000
@@ -233,9 +233,6 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 	}
 	if job.NumSamples <= 0 {
 		job.NumSamples = 33
-	}
-	if job.VoxelSize <= 0 {
-		job.VoxelSize = (job.Dmax * job.Oversampling) / float64(job.NumSamples)
 	}
 
 	res, err := tx.NamedExec(`

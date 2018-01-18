@@ -42,6 +42,8 @@ func execDenss(log *logrus.Logger, job *model.Job, workDir, inputFile string, th
 		inputFile,
 		"--oversampling",
 		fmt.Sprintf("%.4f", job.Oversampling),
+		"--nsamples",
+		fmt.Sprintf("%d", job.NumSamples),
 		"-o",
 		outputPrefix,
 		"--plot_off",
