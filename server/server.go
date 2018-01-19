@@ -41,6 +41,7 @@ func init() {
 	viper.SetDefault("base_url", "http://localhost:8080")
 	viper.SetDefault("show_job_list", true)
 	viper.SetDefault("enable_captcha", false)
+	viper.SetDefault("restrict_params", false)
 }
 
 func middleware(ctx *app.AppContext) *negroni.Negroni {

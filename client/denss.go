@@ -57,6 +57,14 @@ func execDenss(log *logrus.Logger, job *model.Job, workDir, inputFile string, th
 		args = append(args, "--voxel")
 		args = append(args, fmt.Sprintf("%.4f", job.VoxelSize))
 	}
+	if job.Electrons > 0 {
+		args = append(args, "--ne")
+		args = append(args, fmt.Sprintf("%d", job.Electrons))
+	}
+	if job.MaxSteps > 0 {
+		args = append(args, "--steps")
+		args = append(args, fmt.Sprintf("%d", job.MaxSteps))
+	}
 
 	log.WithFields(logrus.Fields{
 		"id":     job.ID,

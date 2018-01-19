@@ -254,6 +254,14 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		return nil, err
 	}
 
+	if viper.GetBool("restrict_params") {
+		// Force set default parameters
+		job.MaxSteps = 3000
+		job.MaxRuns = 20
+		job.NumSamples = 32
+		job.VoxelSize = 0
+	}
+
 	err = model.QueueJob(ctx.DB, job)
 	if err != nil {
 		log.WithFields(log.Fields{
