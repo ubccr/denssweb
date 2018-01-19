@@ -30,7 +30,7 @@ import (
 
 // Create zip archive file of DENSS output files
 func createZIP(job *model.Job, workDir string) error {
-	zipFile := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss-%d.zip", job.ID))
+	zipFile := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss%d-%s.zip", job.ID, job.Name))
 	os.Remove(zipFile)
 
 	zip := new(archivex.ZipFile)

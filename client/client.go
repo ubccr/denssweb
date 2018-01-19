@@ -59,7 +59,7 @@ func processJob(ctx *app.AppContext, job *model.Job, threads int) error {
 	}).Info("Creating job directory")
 
 	model.LogJobMessage(ctx.DB, job, "Setup", "Creating job directory", 0)
-	workDir := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss-%d", job.ID))
+	workDir := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss%d-%s", job.ID, job.Name))
 	os.RemoveAll(workDir)
 	err := os.MkdirAll(workDir, 0700)
 	if err != nil {
@@ -221,7 +221,7 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 		err = processJob(ctx, job, maxThreads)
 		if err != nil {
 			// create zip of logs if job failed
-			workDir := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss-%d", job.ID))
+			workDir := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss%d-%s", job.ID, job.Name))
 
 			logrus.WithFields(logrus.Fields{
 				"id": job.ID,
