@@ -232,7 +232,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 		job.MaxRuns = 20
 	}
 	if job.NumSamples <= 0 {
-		job.NumSamples = 33
+		job.NumSamples = 32
 	}
 
 	res, err := tx.NamedExec(`

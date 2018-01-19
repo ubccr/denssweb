@@ -34,7 +34,6 @@ import (
 // Combine DENSS output files into a single HDF file
 func buildStack(log *logrus.Logger, job *model.Job, workDir string) error {
 	stackFile := filepath.Join(workDir, "stack.hdf")
-	stackResizedFile := filepath.Join(workDir, "stack_resized.hdf")
 
 	args := []string{
 		"--stackname",
@@ -68,40 +67,6 @@ func buildStack(log *logrus.Logger, job *model.Job, workDir string) error {
 		"stackFile": stackFile,
 	}).Info("stack hdf built successfully")
 
-	args = []string{
-		stackFile,
-		stackResizedFile,
-		"--clip",
-		fmt.Sprintf("%d", job.NumSamples-1),
-	}
-
-	log.WithFields(logrus.Fields{
-		"id":               job.ID,
-		"stackFile":        stackFile,
-		"stackResizedFile": stackResizedFile,
-	}).Info("Resizing stack using EMAN2")
-
-	e2proc3d := filepath.Join(viper.GetString("eman2dir"), "bin", "e2proc3d.py")
-	cmd = exec.Command(e2proc3d, args...)
-	cmd.Dir = workDir
-	out, err = cmd.CombinedOutput()
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"id":               job.ID,
-			"error":            err.Error(),
-			"stackFile":        stackFile,
-			"stackResizedFile": stackResizedFile,
-			"output":           string(out),
-		}).Error("e2proc3d.py command failed")
-		return err
-	}
-
-	log.WithFields(logrus.Fields{
-		"id":               job.ID,
-		"stackFile":        stackFile,
-		"stackResizedFile": stackResizedFile,
-	}).Info("stack resized successfully")
-
 	return nil
 }
 
@@ -110,7 +75,7 @@ func runAveraging(log *logrus.Logger, job *model.Job, workDir string, threads in
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(viper.GetInt64("max_seconds"))*time.Second)
 	defer cancel()
 
-	stackResizedFile := filepath.Join(workDir, "stack_resized.hdf")
+	stackResizedFile := filepath.Join(workDir, "stack.hdf")
 
 	args := []string{
 		"--input",
