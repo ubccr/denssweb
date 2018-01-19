@@ -39,52 +39,52 @@ const (
 // A DENSS Job
 type Job struct {
 	// Unique ID for the Job
-	ID int64 `db:"id" json:"id"`
+	ID int64 `db:"id" json:"id" valid:"-" schema:"-"`
 
 	// Email Address
-	Email string `db:"email" json:"-"`
+	Email string `db:"email" json:"-" valid:"email" schema:"email"`
 
 	// Unique Job token
-	Token string `db:"token" json:"-"`
+	Token string `db:"token" json:"-" valid:"-" schema:"-"`
 
 	// Job Status ID
-	StatusID int64 `db:"status_id" json:"-"`
+	StatusID int64 `db:"status_id" json:"-" valid:"-" schema:"-"`
 
 	// Job Status string
-	Status string `db:"status" json:"status"`
+	Status string `db:"status" json:"status" valid:"-" schema:"-"`
 
 	// Task Name
-	Task string `db:"task" json:"task"`
+	Task string `db:"task" json:"task" valid:"-" schema:"-"`
 
 	// Percent complete
-	PercentComplete int64 `db:"percent_complete" json:"percent_complete"`
+	PercentComplete int64 `db:"percent_complete" json:"percent_complete" valid:"-" schema:"-"`
 
 	// Log message for task
-	LogMessage string `db:"log_message" json:"log_message"`
+	LogMessage string `db:"log_message" json:"log_message" valid:"-" schema:"-"`
 
 	// Job Name
-	Name string `db:"name" json:"name"`
+	Name string `db:"name" json:"name" valid:"alphanum~Job name should only contain letters or numbers,length(1|255)~Job name must be less than 255 characters,required~Please enter in a job name" schema:"name"`
 
 	// File Type (dat | out)
-	FileType string `db:"file_type" json:"-"`
+	FileType string `db:"file_type" json:"-" valid:"-" schema:"-"`
 
 	// Input data file (*.dat or GNOM *.out file)
-	InputData []byte `db:"input_data" json:"-"`
+	InputData []byte `db:"input_data" json:"-" valid:"-" schema:"-"`
 
 	// Resulting density map in CCP4 format
-	DensityMap []byte `db:"density_map" json:"-"`
+	DensityMap []byte `db:"density_map" json:"-" valid:"-" schema:"-"`
 
 	// Fourier SHell Correlation (FSC) Curve chart
-	FSCChart []byte `db:"fsc_chart" json:"-"`
+	FSCChart []byte `db:"fsc_chart" json:"-" valid:"-" schema:"-"`
 
 	// Summary stats chart
-	SummaryChart []byte `db:"summary_chart" json:"-"`
+	SummaryChart []byte `db:"summary_chart" json:"-" valid:"-" schema:"-"`
 
 	// A zip of the raw output from DENSS
-	RawData []byte `db:"raw_data" json:"-"`
+	RawData []byte `db:"raw_data" json:"-" valid:"-" schema:"-"`
 
 	// Maximum dimension of particle
-	Dmax float64 `db:"dmax" json:"-"`
+	Dmax float64 `db:"dmax" json:"-" valid:"range(10.0|1000.0)~Dmax should be between 10 and 1000" schema:"dmax"`
 
 	// Number of samples. This represents the size of the grid in each
 	// dimension. The grid is 3D so NumSamples=31 would be 31 x 31 x 31. The
@@ -92,34 +92,34 @@ type Job struct {
 	// More samples means greater resolution. This is calculated by DENSS, it's
 	// not given to DENSS but we want to control the speed of calcuation so we
 	// use this parameter to determine the voxel size.
-	NumSamples int64 `db:"num_samples" json:"-"`
+	NumSamples int64 `db:"num_samples" json:"-" valid:"range(2|500)~Number of samples should be between 2 and 500" schema:"num_samples"`
 
 	// Oversampling size
-	Oversampling float64 `db:"oversampling" json:"-"`
+	Oversampling float64 `db:"oversampling" json:"-" valid:"range(2|50)~Oversampling should be between 2 and 50" schema:"oversampling"`
 
 	// Voxel Size
-	VoxelSize float64 `db:"voxel_size" json:"-"`
+	VoxelSize float64 `db:"voxel_size" json:"-" valid:"range(1.0|100.0)~Voxel Size should be between 1 and 100" schema:"voxel_size"`
 
 	// Number of electrons
-	Electrons int64 `db:"electrons" json:"-"`
+	Electrons int64 `db:"electrons" json:"-" valid:"range(1|100000000)~Electrons should be between 1 and 1e8" schema:"electrons"`
 
 	// Maximum number of steps
-	MaxSteps int64 `db:"max_steps" json:"-"`
+	MaxSteps int64 `db:"max_steps" json:"-" valid:"range(100|10000)~Max Steps should be between 100 and 10000" schema:"max_steps"`
 
 	// Maximum number of times to run DENSS
-	MaxRuns int64 `db:"max_runs" json:"-"`
+	MaxRuns int64 `db:"max_runs" json:"-" valid:"range(2|100)~Max Runs should be between 2 and 100" schema:"max_runs"`
 
 	// Time the job was submitted
-	Submitted *time.Time `db:"submitted" json:"-"`
+	Submitted *time.Time `db:"submitted" json:"-" valid:"-" schema:"-"`
 
 	// Time the job started running
-	Started *time.Time `db:"started" json:"-"`
+	Started *time.Time `db:"started" json:"-" valid:"-" schema:"-"`
 
 	// Time the job completed
-	Completed *time.Time `db:"completed" json:"-"`
+	Completed *time.Time `db:"completed" json:"-" valid:"-" schema:"-"`
 
 	// Current running/wait time for the job. Only used in json
-	Time string `db:"-" json:"time"`
+	Time string `db:"-" json:"time" valid:"-" schema:"-"`
 }
 
 func (j *Job) URL() string {

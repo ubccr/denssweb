@@ -24,10 +24,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-
-	"github.com/jmoiron/sqlx"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/gorilla/schema"
+	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 	"github.com/ubccr/denssweb/model"
 )
@@ -57,9 +58,14 @@ func init() {
 
 type AppContext struct {
 	DB        *sqlx.DB
+	Decoder   *schema.Decoder
 	Tmpldir   string
 	dsn       string
 	templates map[string]*template.Template
+}
+
+func split(s string, d string) []string {
+	return strings.Split(s, d)
 }
 
 func NewAppContext() (*AppContext, error) {
@@ -83,11 +89,15 @@ func NewAppContext() (*AppContext, error) {
 		log.Fatal(err)
 	}
 
+	funcMap := template.FuncMap{
+		"Split": split,
+	}
+
 	templates := make(map[string]*template.Template)
 	for _, t := range tmpls {
 		base := filepath.Base(t)
 		if base != "layout.html" {
-			templates[base] = template.Must(template.New("layout").ParseFiles(t,
+			templates[base] = template.Must(template.New("layout").Funcs(funcMap).ParseFiles(t,
 				tmpldir+"/layout.html"))
 		}
 	}
@@ -96,6 +106,9 @@ func NewAppContext() (*AppContext, error) {
 	app.Tmpldir = tmpldir
 	app.DB = db
 	app.templates = templates
+
+	app.Decoder = schema.NewDecoder()
+	app.Decoder.IgnoreUnknownKeys(true)
 
 	return app, nil
 }

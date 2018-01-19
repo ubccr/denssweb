@@ -1,6 +1,8 @@
-hash: 93c7aa1017328ffe405f3aa73da8c1136924b14ffd4913df5b95dee83b9338ed
-updated: 2018-01-17T11:53:33.003717426-05:00
+hash: 794c597f7cb07765e63d0662d49985c7263d0a27d7d2e2d1bf9dd206f7ef79a2
+updated: 2018-01-19T13:18:39.449059371-05:00
 imports:
+- name: github.com/asaskevich/govalidator
+  version: 4b3d68f87f176641ffc147420296013aff66ea32
 - name: github.com/dchest/captcha
   version: 6a29415a8364ec2971fdc62d9e415ed53fc20410
 - name: github.com/dustin/go-humanize
@@ -13,6 +15,8 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 599cba5e7b6137d46ddf58fb1765f5d928e69604
+- name: github.com/gorilla/schema
+  version: afe77393c53b66afe9212810d9b2013859d04ae6
 - name: github.com/hashicorp/hcl
   version: 630949a3c5fa3c613328e1b8256052cbc2327c9b
   subpackages:

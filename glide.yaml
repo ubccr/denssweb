@@ -13,3 +13,5 @@ import:
 - package: github.com/jhoonb/archivex
 - package: github.com/dustin/go-humanize
 - package: github.com/dchest/captcha
+- package: github.com/asaskevich/govalidator
+- package: github.com/gorilla/schema

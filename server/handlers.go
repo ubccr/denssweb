@@ -24,12 +24,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/mail"
 	"strconv"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	valid "github.com/asaskevich/govalidator"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 	"github.com/spf13/viper"
 	"github.com/ubccr/denssweb/app"
 	"github.com/ubccr/denssweb/model"
@@ -198,19 +200,6 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		fileType = "dat"
 	}
 
-	name := r.FormValue("name")
-	if len(name) > 255 {
-		return nil, errors.New("Job name must be less than 255 characters")
-	}
-
-	email := r.FormValue("email")
-	if len(email) > 0 {
-		_, err := mail.ParseAddress(email)
-		if err != nil {
-			return nil, errors.New("Please provide a valid email address")
-		}
-	}
-
 	captchaID := r.FormValue("captcha_id")
 	captchaSol := r.FormValue("captcha_sol")
 	if viper.GetBool("enable_captcha") {
@@ -226,36 +215,64 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		}
 	}
 
-	job := &model.Job{InputData: data, Dmax: dmax, FileType: fileType, Name: name, Email: email}
+	job := &model.Job{InputData: data, FileType: fileType}
 
-	// Set optional parameters
-	job.NumSamples, err = parseInt(r.FormValue("num_samples"), "Samples")
+	err = ctx.Decoder.Decode(job, r.PostForm)
 	if err != nil {
-		return nil, err
+		switch serr := err.(type) {
+		case schema.ConversionError:
+			return nil, errors.New(fmt.Sprintf("Invalid data for %s", serr.Key))
+		case schema.MultiError:
+			msg := make([]string, 0)
+			for k, _ := range serr {
+				msg = append(msg, fmt.Sprintf("Invalid data for %s", k))
+			}
+			return nil, errors.New(strings.Join(msg, ";"))
+		default:
+			log.WithFields(log.Fields{
+				"err": err,
+			}).Error("Failed to decode form input")
+			return nil, errors.New("The input data you provided is invalid")
+		}
 	}
-	job.Oversampling, err = parseFloat(r.FormValue("oversampling"), "Oversampling")
-	if err != nil {
-		return nil, err
+
+	if len(job.Name) == 0 {
+		return nil, errors.New("Job name is required")
 	}
-	job.VoxelSize, err = parseFloat(r.FormValue("voxel_size"), "Voxel Size")
-	if err != nil {
-		return nil, err
+	if !valid.IsAlphanumeric(job.Name) {
+		return nil, errors.New("Job name must only contain letters or numbers")
 	}
-	job.Electrons, err = parseInt(r.FormValue("electrons"), "Electrons")
-	if err != nil {
-		return nil, err
+	if len(job.Name) > 255 {
+		return nil, errors.New("Job name must be less than 255 characters")
 	}
-	job.MaxSteps, err = parseInt(r.FormValue("max_steps"), "Max Steps")
-	if err != nil {
-		return nil, err
+
+	// Validate parameters to sane default ranges
+	// *Note* range validator tag is not currently working.
+	// See: https://github.com/asaskevich/govalidator/issues/223
+	if job.Dmax > 0 && !valid.InRangeFloat64(job.Dmax, 10, 1000) {
+		return nil, errors.New("Dmax should be between 10 and 1000")
 	}
-	job.MaxRuns, err = parseInt(r.FormValue("max_runs"), "Max Runs")
-	if err != nil {
-		return nil, err
+	if job.MaxSteps > 0 && !valid.InRangeInt(job.MaxSteps, 100, 10000) {
+		return nil, errors.New("Max Steps should be between 10 and 10000")
+	}
+	if job.NumSamples > 0 && !valid.InRangeInt(job.NumSamples, 2, 500) {
+		return nil, errors.New("Num Samples should be between 2 and 500")
+	}
+	if job.Oversampling > 0 && !valid.InRangeFloat64(job.Oversampling, 2, 50) {
+		return nil, errors.New("Oversampling should be between 2 and 50")
+	}
+	if job.MaxRuns > 0 && !valid.InRangeInt(job.MaxRuns, 2, 1000) {
+		return nil, errors.New("Max Runs should be between 2 and 1000")
+	}
+	if job.VoxelSize > 0 && !valid.InRangeFloat64(job.VoxelSize, 1, 100) {
+		return nil, errors.New("Voxel Size should be between 1 and 100")
+	}
+	if job.Electrons > 0 && !valid.InRangeInt(job.Electrons, 1, 100000000) {
+		return nil, errors.New("Electrons should be between 1 and 1e8")
 	}
 
 	if viper.GetBool("restrict_params") {
-		// Force set default parameters
+		// Force setting default parameters
 		job.MaxSteps = 3000
 		job.MaxRuns = 20
 		job.NumSamples = 32
