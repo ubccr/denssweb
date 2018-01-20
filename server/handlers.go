@@ -241,7 +241,7 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	}
 
 	if !valid.IsAlphanumeric(job.Name) {
-		return nil, errors.New("Job name must only contain letters or numbers")
+		return nil, errors.New("Job name must only contain letters and numbers")
 	}
 
 	if len(job.Name) > 255 {
