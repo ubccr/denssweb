@@ -19,21 +19,14 @@
     <label  class="col-sm-3 control-label">Upload Data File</label>
     <div class="col-sm-6">
         <input type="file" name="inputFile" id="inputFile">
-        <p class="help-block">Must be 3-column ascii text file (DAT) or GNOM (.out) file</p>
+        <p class="help-block">Must be 3-column ascii text file (DAT*) or GNOM (.out) file</p>
     </div>
   </div>
   <div class="form-group">
     <label  class="col-sm-3 control-label">Job Name</label>
     <div class="col-sm-6">
       <input name="name" class="form-control" size="20" type="text">
-      <p class="help-block">Must contain only letters or numbers and be less than 255 characters</p>
-    </div>
-  </div>
-  <div class="form-group">
-    <label  class="col-sm-3 control-label">Maximum Dimension of Particle (D)</label>
-    <div class="col-sm-2">
-      <input name="dmax" class="form-control" size="4" type="text">
-      <p class="help-block">Required for DAT files</p>
+      <p class="help-block">Must be alphanumeric and less than 255 characters</p>
     </div>
   </div>
   <div class="form-group">
@@ -43,47 +36,63 @@
     </div>
   </div>
   <div class="form-group">
-    <label  class="col-sm-3 control-label">Email</label>
-    <div class="col-sm-6">
-      <input name="email" class="form-control" size="20" type="text">
+    <label  class="col-sm-3 control-label">Estimated maximum dimension</label>
+    <div class="col-sm-2">
+      <input name="dmax" class="form-control" size="4" type="text">
+      <p class="help-block">* Required for DAT files</p>
     </div>
   </div>
   <div class="form-group">
     <label  class="col-sm-3 control-label">Oversampling</label>
-    <div class="col-sm-2">
+    <div class="col-sm-4">
       <input name="oversampling" class="form-control" size="4" type="text" placeholder="3.0">
+      <p class="help-block">Sampling ratio</p>
     </div>
   </div>
   <div class="form-group">
     <label  class="col-sm-3 control-label">Electrons</label>
-    <div class="col-sm-2">
+    <div class="col-sm-4">
       <input name="electrons" class="form-control" size="4" type="text" placeholder="10000">
+      <p class="help-block">Number of electrons in object</p>
     </div>
   </div>
   <div class="form-group">
     <label  class="col-sm-3 control-label">Max Steps</label>
-    <div class="col-sm-2">
+    <div class="col-sm-4">
       <input name="max_steps" class="form-control" size="4" type="text" placeholder="3000">
+      <p class="help-block">Maximum number of steps (iterations)</p>
     </div>
   </div>
   <div class="form-group">
     <label  class="col-sm-3 control-label">Max Runs</label>
-    <div class="col-sm-2">
+    <div class="col-sm-4">
       <input name="max_runs" class="form-control" size="4" type="text" placeholder="20">
+      <p class="help-block">The number of reconstructions to run</p>
     </div>
   </div>
   <div class="form-group">
     <label  class="col-sm-3 control-label">Samples</label>
-    <div class="col-sm-2">
+    <div class="col-sm-4">
       <input name="num_samples" class="form-control" size="4" type="text" placeholder="33">
+      <p class="help-block">Number of samples, i.e. grid points, along a single dimension. (Sets voxel size, overridden by Voxel Size. Best optimization with n=power of 2)</p>
     </div>
   </div>
   <div class="form-group">
     <label  class="col-sm-3 control-label">Voxel Size</label>
-    <div class="col-sm-2">
+    <div class="col-sm-4">
       <input name="voxel_size" class="form-control" size="4" type="text">
+      <p class="help-block">Set desired voxel size, setting resolution of map</p>
     </div>
   </div>
+{{ if .enableEmail }}
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Email</label>
+    <div class="col-sm-6">
+      <input name="email" class="form-control" size="20" type="text">
+      <p class="help-block">Email address to send job notifications</p>
+    </div>
+  </div>
+{{ end }}
 {{ with .captchaID }}
   <div class="form-group">
     <label class="col-sm-2 control-label">&nbsp;</label>

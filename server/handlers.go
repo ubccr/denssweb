@@ -159,7 +159,9 @@ func SubmitHandler(ctx *app.AppContext) http.Handler {
 		}
 
 		vars := map[string]interface{}{
-			"message": message}
+			"emailEnabled": viper.GetBool("enable_notifications"),
+			"message":      message,
+		}
 
 		if viper.GetBool("enable_captcha") {
 			vars["captchaID"] = captcha.New()
@@ -241,7 +243,7 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	}
 
 	if !valid.IsAlphanumeric(job.Name) {
-		return nil, errors.New("Job name must only contain letters and numbers")
+		return nil, errors.New("Job name must be alphanumeric")
 	}
 
 	if len(job.Name) > 255 {
