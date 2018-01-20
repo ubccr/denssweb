@@ -239,11 +239,17 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	if len(job.Name) == 0 {
 		return nil, errors.New("Job name is required")
 	}
+
 	if !valid.IsAlphanumeric(job.Name) {
 		return nil, errors.New("Job name must only contain letters or numbers")
 	}
+
 	if len(job.Name) > 255 {
 		return nil, errors.New("Job name must be less than 255 characters")
+	}
+
+	if len(job.Email) > 0 && !valid.IsEmail(job.Email) {
+		return nil, errors.New("Please provide a valid email address")
 	}
 
 	// Validate parameters to sane default ranges

@@ -14,7 +14,7 @@
     <script src="/static/js/LiteMol-plugin.js?lmversion=14"></script>
     <div class="alert alert-success" role="alert">
         <strong>Completed in {{ .job.RunTime }}</strong> Your job completed on {{ .job.Completed.Local.Format "2006/01/02 15:04:05 EST" }}
-        &nbsp;&nbsp;&nbsp;<a class="btn btn-primary" href="{{ .job.URL }}/denss-{{ .job.ID }}-output.zip">Download Results</a>
+        &nbsp;&nbsp;&nbsp;<a class="btn btn-primary" href="{{ .job.URL }}/denss{{ .job.ID }}-{{ .job.Name }}.zip">Download Results</a>
     </div>
     <div class="page-header">Electron Density Map</div>
     <div class="row">
