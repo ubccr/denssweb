@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	TokenRegex = `[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\-\_]+`
+	TokenPattern = `[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\-\_]+`
 )
 
 func init() {
@@ -58,16 +58,16 @@ func middleware(ctx *app.AppContext) *negroni.Negroni {
 		router.Path("/jobs").Handler(JobListHandler(ctx)).Methods("GET")
 	}
 	if viper.GetBool("enable_captcha") {
-		router.Path(fmt.Sprintf("/captcha/{cid:%s}.png", TokenRegex)).Handler(captcha.Server(captcha.StdWidth, captcha.StdHeight))
+		router.Path(fmt.Sprintf("/captcha/{cid:%s}.png", TokenPattern)).Handler(captcha.Server(captcha.StdWidth, captcha.StdHeight))
 	}
 
 	router.Path("/submit").Handler(SubmitHandler(ctx)).Methods("GET", "POST")
-	router.Path(fmt.Sprintf("/job/{id:%s}", TokenRegex)).Handler(JobHandler(ctx)).Methods("GET")
-	router.Path(fmt.Sprintf("/job/{id:%s}/status", TokenRegex)).Handler(StatusHandler(ctx)).Methods("GET")
-	router.Path(fmt.Sprintf("/job/{id:%s}/density-map.ccp4", TokenRegex)).Handler(DensityMapHandler(ctx)).Methods("GET")
-	router.Path(fmt.Sprintf("/job/{id:%s}/fsc.png", TokenRegex)).Handler(FSCChartHandler(ctx)).Methods("GET")
-	router.Path(fmt.Sprintf("/job/{id:%s}/summary.png", TokenRegex)).Handler(SummaryChartHandler(ctx)).Methods("GET")
-	router.Path(fmt.Sprintf("/job/{id:%s}/denss{jid:[0-9]+}-{name:[A-Za-z0-9]+}.zip", TokenRegex)).Handler(RawDataHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}", TokenPattern)).Handler(JobHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}/status", TokenPattern)).Handler(StatusHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}/density-map.ccp4", TokenPattern)).Handler(DensityMapHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}/fsc.png", TokenPattern)).Handler(FSCChartHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}/summary.png", TokenPattern)).Handler(SummaryChartHandler(ctx)).Methods("GET")
+	router.Path(fmt.Sprintf("/job/{id:%s}/denss{jid:[0-9]+}-{name:%s}.zip", TokenPattern, TokenPattern)).Handler(RawDataHandler(ctx)).Methods("GET")
 	router.Path("/").Handler(IndexHandler(ctx)).Methods("GET")
 
 	n := negroni.New(negroni.NewRecovery())

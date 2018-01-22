@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -39,6 +40,10 @@ import (
 
 const (
 	MaxFileSize = 1 << (10 * 2) // 1MB
+)
+
+var (
+	JobNameRegexp = regexp.MustCompile(`^[A-Za-z0-9\-\_]+$`)
 )
 
 func IndexHandler(ctx *app.AppContext) http.Handler {
@@ -242,12 +247,12 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		return nil, errors.New("Job name is required")
 	}
 
-	if !valid.IsAlphanumeric(job.Name) {
-		return nil, errors.New("Job name must be alphanumeric")
-	}
-
 	if len(job.Name) > 255 {
 		return nil, errors.New("Job name must be less than 255 characters")
+	}
+
+	if !JobNameRegexp.MatchString(job.Name) {
+		return nil, errors.New("Job name must be alphanumeric")
 	}
 
 	if len(job.Email) > 0 && !valid.IsEmail(job.Email) {
