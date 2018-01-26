@@ -48,6 +48,12 @@ Start the DENSSWeb client/server::
 
 Point your browser at http://localhost:8080 and submit a Job
 
+To limit the number of threads DENSSWeb spawns use the ``-t`` option.
+By default, this will be set to the number of cores available on your machine.
+For example::
+
+    $ ./denssweb -d run -t 4
+
 The raw output files for each job are stored in ``work_dir/denss-JOBID``.
 ``work_dir`` by default is set to a directory named ``denssweb-work`` in your
 current working directory but you can override this in the denssweb.yaml file.
