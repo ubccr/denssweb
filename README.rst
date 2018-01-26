@@ -60,18 +60,30 @@ If you're running DENSSWeb on a server you must edit the ``bind`` and
 Building from source
 ------------------------------------------------------------------------
 
-Compile the DENSS Viewer LiteMol plugin. See `here <denss-viewer/README.rst>`_
-
 DENSSWeb is written in `Go <https://golang.org/>`_ and uses `glide <http://glide.sh/>`_ 
 for package management. Be sure you have a working Go environment and have
 glide installed.  To compile from source run::
 
-    $ go get -u github.com/ubccr/denssweb
-    $ cd $GOPATH/src/github.com/ubccr/dessweb
-    $ ./build.sh tmpl
-    $ cp denssweb.yaml.sample denssweb.yaml
-    (edit to taste)
-    $ denssweb -d run
+	$ mkdir -p $GOPATH/src/github.com/ubccr
+	$ cd $GOPATH/src/github.com/ubccr
+	$ git clone --recursive https://github.com/ubccr/denssweb
+	$ cd denssweb
+	$ glide install
+	$ go build
+	$ cp denssweb.yaml.sample denssweb.yaml
+	(edit to taste)
+	templates: "dist/templates"
+
+Next, compile the DENSS Viewer LiteMol plugin. For instructions 
+see `here <denss-viewer/README.rst>`_
+
+Assemble the web assets and template files::
+
+	$ ./build.sh tmpl
+
+Run denssweb::
+
+	$ ./denssweb -d run
 
 ------------------------------------------------------------------------
 Required Software
