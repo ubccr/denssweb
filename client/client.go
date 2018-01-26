@@ -97,7 +97,7 @@ func processJob(ctx *app.AppContext, job *model.Job, threads int) error {
 	}).Info("Running DENSS")
 
 	model.LogJobMessage(ctx.DB, job, "Run DENSS", fmt.Sprintf("Performing %d parallel DENSS runs", job.MaxRuns), 25)
-	err = runDenss(log, job, workDir)
+	err = runDenss(log, job, workDir, threads)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err.Error(),
@@ -201,9 +201,7 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 
 		job, err := model.FetchNextPending(ctx.DB)
 		if err != nil {
-			if err == sql.ErrNoRows {
-				logrus.Info("No pending jobs found")
-			} else {
+			if err != sql.ErrNoRows {
 				logrus.WithFields(logrus.Fields{
 					"error": err.Error(),
 				}).Error("Failed to fetch pending job")

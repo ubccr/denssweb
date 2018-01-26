@@ -92,7 +92,7 @@ func execDenss(log *logrus.Logger, job *model.Job, workDir, inputFile string, th
 }
 
 // Run denss.py in parallel
-func runDenss(log *logrus.Logger, job *model.Job, workDir string) error {
+func runDenss(log *logrus.Logger, job *model.Job, workDir string, threads int) error {
 
 	inputFile := filepath.Join(workDir, fmt.Sprintf("input.%s", job.FileType))
 	err := ioutil.WriteFile(inputFile, job.InputData, 0640)
@@ -104,28 +104,70 @@ func runDenss(log *logrus.Logger, job *model.Job, workDir string) error {
 		return err
 	}
 
+	maxRuns := int(job.MaxRuns)
+
+	batches := maxRuns
+	remainder := 0
+	if maxRuns > threads {
+		batches = maxRuns / threads
+		remainder = maxRuns % threads
+	}
+
+	log.WithFields(logrus.Fields{
+		"id":        job.ID,
+		"batches":   batches,
+		"threads":   threads,
+		"remainder": remainder,
+		"maxRuns":   maxRuns,
+	}).Info("Executing denss in batches of parallel runs")
+
+	for i := 0; i < batches; i++ {
+		err := runDenssBatch(log, job, workDir, inputFile, threads, (i * threads))
+		if err != nil {
+			return err
+		}
+	}
+
+	if remainder > 0 {
+		err := runDenssBatch(log, job, workDir, inputFile, remainder, (batches * threads))
+		if err != nil {
+			return err
+		}
+	}
+
+	log.WithFields(logrus.Fields{
+		"id":        job.ID,
+		"batches":   batches,
+		"threads":   threads,
+		"remainder": remainder,
+		"maxRuns":   job.MaxRuns,
+	}).Info("denss.py runs completed successfully")
+
+	return nil
+}
+
+func runDenssBatch(log *logrus.Logger, job *model.Job, workDir, inputFile string, threads, batchOffset int) error {
 	var wg sync.WaitGroup
 	errChannel := make(chan error, 1)
 
-	maxRuns := int(job.MaxRuns)
-
-	wg.Add(maxRuns)
+	wg.Add(threads)
 	finished := make(chan bool, 1)
 
 	log.WithFields(logrus.Fields{
-		"id":      job.ID,
-		"maxRuns": job.MaxRuns,
-	}).Info("Spawning denss.py runs")
+		"id":          job.ID,
+		"batchOffset": batchOffset,
+		"threads":     threads,
+	}).Info("Spawning denss.py parallel runs")
 
-	for i := 0; i < maxRuns; i++ {
+	for i := 0; i < threads; i++ {
 		go func(thread int) {
-			err = execDenss(log, job, workDir, inputFile, thread)
+			err := execDenss(log, job, workDir, inputFile, thread)
 			if err != nil {
 				errChannel <- err
 			}
 
 			wg.Done()
-		}(i)
+		}(i + batchOffset)
 	}
 
 	go func() {
@@ -140,11 +182,6 @@ func runDenss(log *logrus.Logger, job *model.Job, workDir string) error {
 			return err
 		}
 	}
-
-	log.WithFields(logrus.Fields{
-		"id":      job.ID,
-		"maxRuns": job.MaxRuns,
-	}).Info("denss.py runs completed successfully")
 
 	return nil
 }
