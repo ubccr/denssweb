@@ -40,7 +40,6 @@ func init() {
 
 	viper.SetDefault("work_dir", filepath.Join(wd, "denssweb-work"))
 	viper.SetDefault("denss_path", "/usr/local/bin/denss.py")
-	viper.SetDefault("map2map_path", filepath.Join(os.Getenv("HOME"), "Situs_2.8", "bin", "map2map"))
 	viper.SetDefault("eman2dir", filepath.Join(os.Getenv("HOME"), "EMAN2"))
 	viper.SetDefault("fsc_path", filepath.Join(wd, "scripts", "denssweb-fsc-chart.py"))
 	viper.SetDefault("summary_path", filepath.Join(wd, "scripts", "denssweb-summary-chart.py"))
@@ -188,7 +187,6 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 	logrus.Info("Client config")
 	logrus.Info("--------------------------------------------")
 	logrus.Infof("Path to denss.py: %s", viper.GetString("denss_path"))
-	logrus.Infof("Path to map2map: %s", viper.GetString("map2map_path"))
 	logrus.Infof("Path to EMAN2: %s", viper.GetString("eman2dir"))
 	logrus.Infof("Path to denssweb-fsc-chart.py: %s", viper.GetString("fsc_path"))
 	logrus.Infof("Path to denss-summary-chart.py: %s", viper.GetString("summary_path"))
