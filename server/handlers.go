@@ -58,6 +58,12 @@ func AboutHandler(ctx *app.AppContext) http.Handler {
 	})
 }
 
+func TutorialHandler(ctx *app.AppContext) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx.RenderTemplate(w, "tutorial.html", nil)
+	})
+}
+
 func JobListHandler(ctx *app.AppContext) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		status, _ := strconv.Atoi(r.FormValue("status"))

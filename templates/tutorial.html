@@ -1,0 +1,105 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>Tutorial</h1>
+</div>
+
+<ul>
+<li>
+DENSSWeb runs a front end interface to DENSS and uses EMAN2 to perform
+alignment and averaging of 20 independent reconstructions.
+</li>
+
+<li>
+DENSS works best with a smooth fit to the SAXS profile instead of using the raw
+data. To get a smooth fit, use an <a
+href="https://en.wikipedia.org/wiki/Indirect_Fourier_transform">indirect
+Fourier transform</a> algorithm such as <a
+href="https://www.embl-hamburg.de/biosaxs/gnom.html">GNOM</a>. These methods
+take advantage of the oversampling provided by solution scattering experiments.
+</li>
+
+<li>
+The input for DENSS is either the GNOM .out file or a 3 column ASCII text
+file where the columns are q, Intensity, error. Make sure there’s no zeros
+anywhere in the file (including the errors columns and first few rows of
+the file, which sometimes are zeros due to the beamstop).
+</li>
+
+<li>
+Each job submitted to DENSSWeb will be given a unique ID code. However, the
+Job Name field can be used for giving your job a more descriptive name.
+This field can only contain letters, numbers, dashes (-) and underscores
+(_) (no spaces or special characters allowed).
+</li>
+
+<li>
+If using a standard .dat file (3-column ASCII text), you must also enter
+the estimated maximum dimension of the particle (this partly defines the
+size of the box containing the particle). When using a GNOM file, the
+estimated maximum dimension (Dmax) is taken directly from the .out file and
+does not need to be entered in the input field. However, you may enter a
+different Dmax than in the .out file if you like.
+</li>
+
+<li>
+To keep DENSSWeb running efficiently and allowing multiple users to use the
+server, DENSSWeb always sets the number of samples, N, to be 32 and does
+not allow the user to change this (computation scales as N^3).
+</li>
+
+<li>
+While N is set to 32, one can change the oversampling from the default of
+3.0. The real space voxel size will adjust to ensure N=32. Oversampling as
+low as 2 can work in some simple cases. However, for complex cases larger
+oversampling (say 5), may be needed to ensure that the calculated
+scattering matches the data. If the fits look poor (*_fit.png or
+*_map.fit), increase oversampling to try and improve the number of grid
+points that get scaled in reciprocal space. Note that this will increase
+the real space voxel size, lowering resolution. However, in most cases the
+reconstructions do not support such high resolutions, so it shouldn’t be a
+problem. To see if it may be a problem, check out the FSC curve in the
+folder spt_01/fsc_0.txt, if FSC falls below 0.5 before the end of the
+x-axis, you’re unlikely to gain resolution by decreasing the voxel size
+anyways. If you want to increase the oversampling *and* decrease the voxel
+size (thus requiring N&gt;32), you must download DENSS and EMAN2 and run
+things yourself. This is made simpler with the superdenss bash script
+available on the DENSS github page <a href="https://github.com/tdgrant1/denss">here</a>.
+</li>
+
+<li>
+If you'd like to set the actual number of electrons in the map to be
+something you know, for example from the molecular weight of the particle,
+enter the number of electrons in the Electrons input. This simply scales
+the density of the final map such that the total number of electrons
+matches the input value.
+</li>
+
+<li>
+Enter the reCaptcha number to ensure you're not a robot and click Submit.
+</li>
+
+<li>
+Typical times are about 5 minutes per job.
+</li>
+
+<li>
+When complete, the browser will display an embedded LiteMol window showing
+the electron density map. This display is interactive, including changing
+the isolevels (click the tools icon in the LiteMol window).
+</li>
+
+<li>
+Below the interactive density display is a plot of the Fourier Shell
+Correlation as a function of resolution. The estimated resolution of the
+averaged reconstruction is given by where the FSC falls below 0.5, and that
+value is displayed on the plot.
+</li>
+
+<li>
+Below the FSC curve is a series of three plots showing various statistics
+(chi^2, Rg, Support Volume) as a function of step number. Plots for all 20
+reconstructions are shown.
+</li>
+</ul>
+
+{{end}}

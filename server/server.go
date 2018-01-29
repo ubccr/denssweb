@@ -53,6 +53,7 @@ func middleware(ctx *app.AppContext) *negroni.Negroni {
 
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(fmt.Sprintf("%s/static", ctx.Tmpldir)))))
 	router.Path("/about").Handler(AboutHandler(ctx)).Methods("GET")
+	router.Path("/tutorial").Handler(TutorialHandler(ctx)).Methods("GET")
 
 	if viper.GetBool("show_job_list") {
 		router.Path("/jobs").Handler(JobListHandler(ctx)).Methods("GET")
