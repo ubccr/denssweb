@@ -85,7 +85,7 @@ $(function() {
 {{ else if eq .job.Status "Error" }}
     <div class="alert alert-danger" role="alert">
         <strong>Failed</strong> Your job failed on {{ .job.Completed.Local.Format "2006/01/02 15:04:05 EST" }}
-        &nbsp;&nbsp;&nbsp;<a class="btn btn-primary" href="{{ .job.URL }}/denss-{{ .job.ID }}-output.zip">Download Results</a>
+        &nbsp;&nbsp;&nbsp;<a class="btn btn-primary" href="{{ .job.URL }}/denss{{ .job.ID }}-output.zip">Download Results</a>
     </div>
     <p id="task" class="lead">{{ .job.Task }}</p>
     <pre id="log">{{ .job.LogMessage }}</pre>
