@@ -66,16 +66,12 @@ If you're running DENSSWeb on a server you must edit the ``bind`` and
 Building from source
 ------------------------------------------------------------------------
 
-DENSSWeb is written in `Go <https://golang.org/>`_ and uses `glide <http://glide.sh/>`_ 
-for package management. Be sure you have a working Go environment and have
-glide installed.  To compile from source run::
+DENSSWeb is written in `Go <https://golang.org/>`_ and requires go v1.11 or
+greater. To compile from source run::
 
-	$ mkdir -p $GOPATH/src/github.com/ubccr
-	$ cd $GOPATH/src/github.com/ubccr
 	$ git clone --recursive https://github.com/ubccr/denssweb
 	$ cd denssweb
-	$ glide install
-	$ go build
+	$ go build .
 	$ cp denssweb.yaml.sample denssweb.yaml
 	(edit to taste)
 	templates: "dist/templates"
@@ -101,16 +97,16 @@ DENSSWeb requires the following software
 * `DENSS <https://github.com/tdgrant1/denss>`_
 * `EMAN2 <https://github.com/cryoem/eman2>`_
 
-The following guide assumes you're running Linux Ubuntu 16.04. You will need to
+The following guide assumes you're running Linux Ubuntu 18.04. You will need to
 adjust package names for your distro.
 
 Install required packages::
 
-    $ apt-get install libhdf5-10 libhdf5-dev libpng12-0 libpng12-dev libtiff5 libtiff5-dev \
+    $ apt-get install libhdf5-100 libhdf5-dev libpng-dev libtiff5 libtiff5-dev \
          python-qt4 python-qt4-gl python-opengl python-matplotlib libfftw3-3 libfftw3-dev \
-         libgsl0-dev db-util libdb-dev python-bsddb3 libboost-all-dev python-dev cmake \
+         libgsl-dev db-util libdb-dev python-bsddb3 libboost-all-dev python-dev cmake \
          cmake-curses-gui ipython libgl1-mesa-dev libglu1-mesa-dev libftgl2 libftgl-dev
-         python-scipy build-essential git
+         python-scipy build-essential git python-numpy
 
 Installing DENSS
 ~~~~~~~~~~~~~~~~~
@@ -124,35 +120,7 @@ Clone and install DENSS::
 Installing EMAN2
 ~~~~~~~~~~~~~~~~~
 
-Clone eman2 source code and run cmake::
-
-    $ git clone https://github.com/cryoem/eman2
-    $ cd eman2
-    $ mkdir build
-    $ cd build
-    $ ccmake
-    (type c to configure)
-    (type e to exit)
-
-Fix the following variables::
-
-    PYTHON_LIBRARY=/usr/lib/python2.7/config-x86_64-linux-gnu/libpython2.7.so
-    ZLIB_LIBRARY=/usr/lib/x86_64-linux-gnu/libz.so
-    HDF5_INCLUDE_PATH=/usr/include/hdf5/serial
-    HDF5_LIBRARY=/usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so
-    TIFF_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
-
-Compile and install::
-
-    $ make
-    $ make install
-
-Setup env variables in ~/.bashrc::
-
-    export EMAN2DIR=$HOME/EMAN2
-    export PATH=$PATH:$EMAN2DIR/bin
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMAN2DIR/lib
-    export PYTHONPATH=$PYTHONPATH:$EMAN2DIR/lib
+See `here <https://blake.bcm.edu/emanwiki/EMAN2/Install>`_ for instructions on installing EMAN2. 
 
 ------------------------------------------------------------------------
 License
