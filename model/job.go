@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dustin/go-humanize"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )

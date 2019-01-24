@@ -25,7 +25,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/ubccr/denssweb/app"
 	"github.com/ubccr/denssweb/model"

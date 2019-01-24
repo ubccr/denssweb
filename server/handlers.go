@@ -28,11 +28,11 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/ubccr/denssweb/app"
 	"github.com/ubccr/denssweb/model"

@@ -23,9 +23,9 @@ import (
 	"net/http"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/ubccr/denssweb/app"
 	"github.com/urfave/negroni"
