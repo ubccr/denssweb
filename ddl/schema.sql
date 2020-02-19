@@ -21,6 +21,7 @@ CREATE TABLE `job` (
     `electrons`        int(11)           NOT NULL,
     `max_steps`        int(11)           NOT NULL,
     `max_runs`         int(11)           NOT NULL,
+    `params`           longtext          NOT NULL,
     `submitted`        datetime          NULL,
     `started`          datetime          NULL,
     `completed`        datetime          NULL,

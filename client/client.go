@@ -97,57 +97,13 @@ func processJob(ctx *app.AppContext, job *model.Job, threads int) error {
 	}).Info("Running DENSS")
 
 	model.LogJobMessage(ctx.DB, job, "Run DENSS", fmt.Sprintf("Performing %d parallel DENSS runs", job.MaxRuns), 25)
-	err = runDenss(log, job, workDir, threads)
+	err = runSuperdenss(log, job, workDir, threads)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err.Error(),
 			"id":    job.ID,
 		}).Error("Failed to run denss")
 		model.LogJobMessage(ctx.DB, job, "Run DENSS Failed", "Failed to run DENSS", 0)
-		return err
-	}
-
-	logrus.WithFields(logrus.Fields{
-		"id": job.ID,
-	}).Info("Building HDF stack")
-
-	model.LogJobMessage(ctx.DB, job, "Process Output", "Combine DENSS output files into hdf", 50)
-	err = buildStack(log, job, workDir)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"error": err.Error(),
-			"id":    job.ID,
-		}).Error("Failed to build stack hdf")
-		model.LogJobMessage(ctx.DB, job, "Process Output Failed", "Failed to build hdf stack", 0)
-		return err
-	}
-
-	logrus.WithFields(logrus.Fields{
-		"id": job.ID,
-	}).Info("Running subtomogram averaging")
-	model.LogJobMessage(ctx.DB, job, "Run averaging", "Running subtomogram averaging", 52)
-	err = runSubtomogramAveraging(log, job, workDir)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"error": err.Error(),
-			"id":    job.ID,
-		}).Error("Failed to run subtomogram averaging")
-		model.LogJobMessage(ctx.DB, job, "Process Output Failed", "Failed to run subtomogram averaging", 0)
-		return err
-	}
-
-	logrus.WithFields(logrus.Fields{
-		"id": job.ID,
-	}).Info("Running Averaging")
-
-	model.LogJobMessage(ctx.DB, job, "Run Averaging", "Run parallel averaging using EMAN2", 75)
-	err = runAveraging(log, job, workDir, threads)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"error": err.Error(),
-			"id":    job.ID,
-		}).Error("Failed to run averaging")
-		model.LogJobMessage(ctx.DB, job, "Run Averaging Failed", "Failed to run averaging using EMAN2", 0)
 		return err
 	}
 

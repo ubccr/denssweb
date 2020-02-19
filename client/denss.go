@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -46,7 +47,7 @@ func execDenss(log *logrus.Logger, job *model.Job, workDir, inputFile string, th
 		outputPrefix,
 		"--plot_off",
 		"--mode",
-		job.Mode,
+		strings.ToUpper(job.Mode),
 	}
 
 	if job.Dmax > 0 {
@@ -65,12 +66,15 @@ func execDenss(log *logrus.Logger, job *model.Job, workDir, inputFile string, th
 		args = append(args, "--nsamples")
 		args = append(args, fmt.Sprintf("%d", job.NumSamples))
 	}
+	if !job.Enantiomer {
+		args = append(args, "--enforce_connectivity_off")
+	}
 
 	/*
-	if job.MaxSteps > 0 {
-		args = append(args, "--steps")
-		args = append(args, fmt.Sprintf("%d", job.MaxSteps))
-	}
+		if job.MaxSteps > 0 {
+			args = append(args, "--steps")
+			args = append(args, fmt.Sprintf("%d", job.MaxSteps))
+		}
 	*/
 
 	log.WithFields(logrus.Fields{

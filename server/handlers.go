@@ -280,8 +280,8 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	if job.Oversampling > 0 && !valid.InRangeFloat64(job.Oversampling, 2, 50) {
 		return nil, errors.New("Oversampling should be between 2 and 50")
 	}
-	if job.MaxRuns > 0 && !valid.InRangeInt(job.MaxRuns, 2, 1000) {
-		return nil, errors.New("Max Runs should be between 2 and 1000")
+	if job.MaxRuns > 0 && !valid.InRangeInt(job.MaxRuns, 0, 21) {
+		return nil, errors.New("Number of Reconstructions should be between 0 and 20")
 	}
 	if job.VoxelSize > 0 && !valid.InRangeFloat64(job.VoxelSize, 1, 100) {
 		return nil, errors.New("Voxel Size should be between 1 and 100")
@@ -295,20 +295,17 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	if !valid.Matches(job.Method, "(denss|eman2)") {
 		return nil, errors.New("Averaging method should be one of denss or eman2")
 	}
-	if job.Reconstructions > 0 && !valid.InRangeInt(job.Reconstructions, 0, 20) {
-		return nil, errors.New("Reconstructions should be between 0 and 20")
-	}
 	if job.SymmetryAxis > 0 && !valid.InRangeInt(job.Symmetry, 0, 4) {
 		return nil, errors.New("Symmetry should be 1, 2 or 3")
 	}
 	if job.SymmetrySteps != "" {
-        parts := strings.Split(job.SymmetrySteps, " ")
-        for _, i := range parts {
-            _, err := strconv.Atoi(i)
-            if err != nil {
-                return nil, fmt.Errorf("Symmetry steps should be a number: %s", i)
-            }
-        }
+		parts := strings.Split(job.SymmetrySteps, " ")
+		for _, i := range parts {
+			_, err := strconv.Atoi(i)
+			if err != nil {
+				return nil, fmt.Errorf("Symmetry steps should be a number: %s", i)
+			}
+		}
 	}
 
 	if viper.GetBool("restrict_params") {

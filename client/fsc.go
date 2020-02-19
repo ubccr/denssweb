@@ -18,6 +18,7 @@
 package client
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
@@ -29,7 +30,8 @@ import (
 
 // Create Fourier Shell Correlation (FSC) curve
 func plotFSC(log *logrus.Logger, job *model.Job, workDir string) error {
-	fscData := filepath.Join(workDir, "spt_01", "fsc_0.txt")
+	fname := fmt.Sprintf("output_%d_fsc.txt", job.ID)
+	fscData := filepath.Join(workDir, fname)
 	fscPNG := filepath.Join(workDir, "fsc.png")
 
 	log.WithFields(logrus.Fields{

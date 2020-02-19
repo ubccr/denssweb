@@ -18,6 +18,7 @@
 package client
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
@@ -30,6 +31,7 @@ import (
 // Create summary chart
 func plotSummary(log *logrus.Logger, job *model.Job, workDir string) error {
 	summaryPNG := filepath.Join(workDir, "summary.png")
+	outputPrefix := fmt.Sprintf("output_%d", job.ID)
 
 	log.WithFields(logrus.Fields{
 		"id": job.ID,
@@ -37,7 +39,7 @@ func plotSummary(log *logrus.Logger, job *model.Job, workDir string) error {
 
 	args := []string{
 		"--input",
-		workDir,
+		filepath.Join(workDir, outputPrefix),
 		"--output",
 		summaryPNG,
 	}

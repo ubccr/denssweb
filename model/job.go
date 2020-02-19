@@ -38,9 +38,6 @@ const (
 )
 
 type ExtraParams struct {
-	// Reconstructions
-	Reconstructions int64 `db:"-" json:"reconstructions" valid:"-" schema:"reconstructions"`
-
 	// Symmetry
 	Symmetry int64 `db:"-" json:"ncs" valid:"-" schema:"ncs"`
 
@@ -65,7 +62,7 @@ type ExtraParams struct {
 
 // A DENSS Job
 type Job struct {
-    ExtraParams
+	ExtraParams
 
 	// Unique ID for the Job
 	ID int64 `db:"id" json:"id" valid:"-" schema:"-"`
@@ -155,33 +152,32 @@ type Job struct {
 }
 
 func (j *Job) MarshallParams() error {
-    params := &ExtraParams{
-        Reconstructions: j.Reconstructions,
-        Symmetry: j.Symmetry,
-        SymmetryAxis: j.SymmetryAxis,
-        SymmetrySteps: j.SymmetrySteps,
-        Fit: j.Fit,
-        Enantiomer: j.Enantiomer,
-        Mode: j.Mode,
-        Method: j.Method,
-    }
+	params := &ExtraParams{
+		Symmetry:      j.Symmetry,
+		SymmetryAxis:  j.SymmetryAxis,
+		SymmetrySteps: j.SymmetrySteps,
+		Fit:           j.Fit,
+		Enantiomer:    j.Enantiomer,
+		Mode:          j.Mode,
+		Method:        j.Method,
+	}
 
-    jsonBytes, err := json.Marshal(params)
-    if err != nil {
-        return err
-    }
+	jsonBytes, err := json.Marshal(params)
+	if err != nil {
+		return err
+	}
 
-    j.Params = string(jsonBytes)
+	j.Params = string(jsonBytes)
 
-    return nil
+	return nil
 }
 
 func (j *Job) UnmarshallParams() error {
-    if j.Params == "" {
-        return nil
-    }
+	if j.Params == "" {
+		return nil
+	}
 
-    return json.Unmarshal([]byte(j.Params), j)
+	return json.Unmarshal([]byte(j.Params), j)
 }
 
 func (j *Job) URL() string {
@@ -261,10 +257,10 @@ func FetchJob(db *sqlx.DB, token string) (*Job, error) {
 		return nil, err
 	}
 
-    err = job.UnmarshallParams()
-    if err != nil {
-        return nil, err
-    }
+	err = job.UnmarshallParams()
+	if err != nil {
+		return nil, err
+	}
 
 	return &job, nil
 }
@@ -299,11 +295,14 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 	if job.MaxRuns <= 0 {
 		job.MaxRuns = 20
 	}
+	if job.MaxRuns > 20 {
+		job.MaxRuns = 20
+	}
 
-    err = job.MarshallParams()
-    if err != nil {
-        return err
-    }
+	err = job.MarshallParams()
+	if err != nil {
+		return err
+	}
 
 	res, err := tx.NamedExec(`
         insert into job (
@@ -395,10 +394,10 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
 		return nil, err
 	}
 
-    err = job.UnmarshallParams()
-    if err != nil {
-        return nil, err
-    }
+	err = job.UnmarshallParams()
+	if err != nil {
+		return nil, err
+	}
 
 	job.StatusID = StatusRunning
 	job.Status = "Running"
