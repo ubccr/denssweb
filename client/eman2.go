@@ -36,7 +36,7 @@ func buildStack(log *logrus.Logger, job *model.Job, workDir string) error {
 	stackFile := filepath.Join(workDir, "stack.hdf")
 
 	args := []string{
-		"--stackname",
+		"--output",
 		stackFile,
 	}
 	for i := 0; i < int(job.MaxRuns); i++ {
@@ -70,17 +70,82 @@ func buildStack(log *logrus.Logger, job *model.Job, workDir string) error {
 	return nil
 }
 
+// Run initial subtomogram averaging
+func runSubtomogramAveraging(log *logrus.Logger, job *model.Job, workDir string) error {
+	stackFile := filepath.Join(workDir, "stack.hdf")
+
+	args := []string{
+		"--input",
+		stackFile,
+		"--path",
+		"spt_bt_ref",
+	}
+
+	log.WithFields(logrus.Fields{
+		"id":        job.ID,
+		"stackFile": stackFile,
+	}).Info("Building subtomogram using EMAN2")
+
+	e2binaryTree := filepath.Join(viper.GetString("eman2dir"), "bin", "e2spt_binarytree.py")
+	cmd := exec.Command(e2binaryTree, args...)
+	cmd.Dir = workDir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"id":        job.ID,
+			"error":     err.Error(),
+			"stackFile": stackFile,
+			"output":    string(out),
+		}).Error("e2spt_binarytree.py command failed")
+		return err
+	}
+
+	finalAvgFile := filepath.Join(workDir, "spt_bt_ref_01", "final_avg.hdf")
+
+	// Ensure final_avg.hdf exists
+	_, err = os.Stat(finalAvgFile)
+	if os.IsNotExist(err) {
+		log.WithFields(logrus.Fields{
+			"id":           job.ID,
+			"error":        err.Error(),
+			"finalAvgFile": finalAvgFile,
+			"stackFile":    stackFile,
+			"output":       string(out),
+		}).Error("Final averaging file does not exist. e2spt_binarytree.py command failed")
+		return err
+	} else if err != nil {
+		log.WithFields(logrus.Fields{
+			"id":           job.ID,
+			"error":        err.Error(),
+			"finalAvgFile": finalAvgFile,
+			"stackFile":    stackFile,
+			"output":       string(out),
+		}).Error("Failed to read final averaging file. e2spt_binarytree.py command failed")
+		return err
+	}
+
+	log.WithFields(logrus.Fields{
+		"id":        job.ID,
+		"stackFile": stackFile,
+	}).Info("subtomogram built successfully")
+
+	return nil
+}
+
 // Run averaging
 func runAveraging(log *logrus.Logger, job *model.Job, workDir string, threads int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(viper.GetInt64("max_seconds"))*time.Second)
 	defer cancel()
 
 	stackResizedFile := filepath.Join(workDir, "stack.hdf")
+	refFile := filepath.Join(workDir, "spt_bt_ref_01", "final_avg.hdf")
 
 	args := []string{
 		"--input",
 		stackResizedFile,
 		fmt.Sprintf("--parallel=thread:%d", threads),
+		"--ref",
+		refFile,
 		"--saveali",
 		"--savesteps",
 		"--keep",
@@ -91,6 +156,7 @@ func runAveraging(log *logrus.Logger, job *model.Job, workDir string, threads in
 	log.WithFields(logrus.Fields{
 		"id":               job.ID,
 		"stackResizedFile": stackResizedFile,
+		"refFile":          refFile,
 		"threads":          threads,
 	}).Info("Running averaging using EMAN2")
 

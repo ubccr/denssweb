@@ -231,9 +231,6 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 	if job.MaxRuns <= 0 {
 		job.MaxRuns = 20
 	}
-	if job.NumSamples <= 0 {
-		job.NumSamples = 32
-	}
 
 	res, err := tx.NamedExec(`
         insert into job (
@@ -344,9 +341,9 @@ func FetchAllJobs(db *sqlx.DB, status, limit, offset int) ([]*Job, error) {
 	args := make([]interface{}, 0)
 	query := `
         select
-			j.id,
-			j.status_id,
-			s.status,
+            j.id,
+            j.status_id,
+            s.status,
             j.name,
             j.token,
             j.email,

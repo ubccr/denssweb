@@ -294,7 +294,6 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		// Force setting default parameters
 		job.MaxSteps = 3000
 		job.MaxRuns = 20
-		job.NumSamples = 32
 		job.VoxelSize = 0
 	}
 

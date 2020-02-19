@@ -124,6 +124,20 @@ func processJob(ctx *app.AppContext, job *model.Job, threads int) error {
 
 	logrus.WithFields(logrus.Fields{
 		"id": job.ID,
+	}).Info("Running subtomogram averaging")
+	model.LogJobMessage(ctx.DB, job, "Run averaging", "Running subtomogram averaging", 52)
+	err = runSubtomogramAveraging(log, job, workDir)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+			"id":    job.ID,
+		}).Error("Failed to run subtomogram averaging")
+		model.LogJobMessage(ctx.DB, job, "Process Output Failed", "Failed to run subtomogram averaging", 0)
+		return err
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"id": job.ID,
 	}).Info("Running Averaging")
 
 	model.LogJobMessage(ctx.DB, job, "Run Averaging", "Run parallel averaging using EMAN2", 75)
