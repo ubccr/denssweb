@@ -289,6 +289,27 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	if job.Electrons > 0 && !valid.InRangeInt(job.Electrons, 1, 100000000) {
 		return nil, errors.New("Electrons should be between 1 and 1e8")
 	}
+	if !valid.Matches(job.Mode, "(fast|slow|membrane)") {
+		return nil, errors.New("Job mode should be one of fast, slow, or membrane")
+	}
+	if !valid.Matches(job.Method, "(denss|eman2)") {
+		return nil, errors.New("Averaging method should be one of denss or eman2")
+	}
+	if job.Reconstructions > 0 && !valid.InRangeInt(job.Reconstructions, 0, 20) {
+		return nil, errors.New("Reconstructions should be between 0 and 20")
+	}
+	if job.SymmetryAxis > 0 && !valid.InRangeInt(job.Symmetry, 0, 4) {
+		return nil, errors.New("Symmetry should be 1, 2 or 3")
+	}
+	if job.SymmetrySteps != "" {
+        parts := strings.Split(job.SymmetrySteps, " ")
+        for _, i := range parts {
+            _, err := strconv.Atoi(i)
+            if err != nil {
+                return nil, fmt.Errorf("Symmetry steps should be a number: %s", i)
+            }
+        }
+	}
 
 	if viper.GetBool("restrict_params") {
 		// Force setting default parameters
@@ -316,6 +337,8 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		"Electrons":    job.Electrons,
 		"MaxSteps":     job.MaxSteps,
 		"MaxRuns":      job.MaxRuns,
+		"Mode":         job.Mode,
+		"Fit":          job.Fit,
 	}).Info("Job queued successfully")
 
 	if len(job.Email) > 0 {

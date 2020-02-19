@@ -64,7 +64,7 @@ func TestJob(t *testing.T) {
 	}
 
 	if jobx.FileType != job.FileType {
-		t.Errorf("Incorrect job File Type: got %d should be %d", jobx.FileType, job.FileType)
+		t.Errorf("Incorrect job File Type: got %s should be %s", jobx.FileType, job.FileType)
 	}
 
 	jobx, err = FetchJob(db, job.Token)

@@ -46,7 +46,7 @@ func execDenss(log *logrus.Logger, job *model.Job, workDir, inputFile string, th
 		outputPrefix,
 		"--plot_off",
 		"--mode",
-		"FAST",
+		job.Mode,
 	}
 
 	if job.Dmax > 0 {

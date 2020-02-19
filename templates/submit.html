@@ -30,16 +30,55 @@
     </div>
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">&nbsp;</label>
-    <div class="col-sm-6">
-        <span class="help-block"><em>The following parameters are optional:</em></span>
-    </div>
-  </div>
-  <div class="form-group">
     <label  class="col-sm-3 control-label">Estimated maximum dimension</label>
     <div class="col-sm-2">
       <input name="dmax" class="form-control" size="4" type="text">
       <p class="help-block">* Required for DAT files</p>
+    </div>
+    <div class="col-sm-2 checkbox">
+      <label>
+        <input type="checkbox" name="fit" value="1"> Fit Experimental Data
+      </label>
+    </div>
+  </div>
+{{ if .emailEnabled }}
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Email</label>
+    <div class="col-sm-6">
+      <input name="email" class="form-control" size="20" type="text">
+      <p class="help-block">Email address to send job notifications</p>
+    </div>
+  </div>
+{{ end }}
+  <div class="form-group">
+    <label class="col-sm-2 control-label">&nbsp;</label>
+    <div class="col-sm-6">
+        <h2>DENSS Reconstructions</h2>
+    </div>
+  </div>
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Mode: </label>
+    <div class="col-sm-1 radio">
+      <label>
+        <input type="radio" name="mode" value="fast"> Fast
+      </label>
+    </div>
+    <div class="col-sm-1 radio">
+      <label>
+        <input type="radio" name="mode" value="slow" checked="checked"> Slow
+      </label>
+    </div>
+    <div class="col-sm-1 radio">
+      <label>
+        <input type="radio" name="mode" value="membrane"> Membrane
+      </label>
+    </div>
+  </div>
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Samples</label>
+    <div class="col-sm-4">
+      <input name="num_samples" class="form-control" size="4" type="text" placeholder="64">
+      <p class="help-block">Number of samples, i.e. grid points, along a single dimension. (Sets voxel size, overridden by Voxel Size. Best optimization with n=power of 2)</p>
     </div>
   </div>
   <div class="form-group">
@@ -57,17 +96,42 @@
     </div>
   </div>
   <div class="form-group">
+    <label  class="col-sm-3 control-label">Symmetry (N-Fold)</label>
+    <div class="col-sm-4">
+      <input name="ncs" class="form-control" size="4" type="text" placeholder="">
+      <p class="help-block">Rotational symmetry</p>
+    </div>
+  </div>
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Symmetry Axis: </label>
+    <div class="col-sm-1 radio">
+      <label>
+        <input type="radio" name="ncs_axis" value="1" checked="checked"> Largest
+      </label>
+    </div>
+    <div class="col-sm-1 radio">
+      <label>
+        <input type="radio" name="ncs_axis" value="2"> Middle
+      </label>
+    </div>
+    <div class="col-sm-1 radio">
+      <label>
+        <input type="radio" name="ncs_axis" value="3"> Smallest
+      </label>
+    </div>
+  </div>
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Symmetry Steps</label>
+    <div class="col-sm-4">
+      <input name="ncs_steps" class="form-control" size="20" type="text" placeholder="3000 5000 7000 9000">
+      <p class="help-block">Space separated list</p>
+    </div>
+  </div>
+  <div class="form-group">
     <label  class="col-sm-3 control-label">Max Runs</label>
     <div class="col-sm-4">
       <input name="max_runs" class="form-control" size="4" type="text" placeholder="20">
       <p class="help-block">The number of reconstructions to run</p>
-    </div>
-  </div>
-  <div class="form-group">
-    <label  class="col-sm-3 control-label">Samples</label>
-    <div class="col-sm-4">
-      <input name="num_samples" class="form-control" size="4" type="text" placeholder="64">
-      <p class="help-block">Number of samples, i.e. grid points, along a single dimension. (Sets voxel size, overridden by Voxel Size. Best optimization with n=power of 2)</p>
     </div>
   </div>
   <div class="form-group">
@@ -77,15 +141,40 @@
       <p class="help-block">Set desired voxel size, setting resolution of map</p>
     </div>
   </div>
-{{ if .emailEnabled }}
   <div class="form-group">
-    <label  class="col-sm-3 control-label">Email</label>
+    <label class="col-sm-2 control-label">&nbsp;</label>
     <div class="col-sm-6">
-      <input name="email" class="form-control" size="20" type="text">
-      <p class="help-block">Email address to send job notifications</p>
+        <h2>Averaging Procedure</h2>
     </div>
   </div>
-{{ end }}
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Method: </label>
+    <div class="col-sm-1 radio">
+      <label>
+        <input type="radio" name="method" value="denss"> DENSS
+      </label>
+    </div>
+    <div class="col-sm-1 radio">
+      <label>
+        <input type="radio" name="method" value="eman2" checked="checked"> EMAN2
+      </label>
+    </div>
+  </div>
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Reconstructions</label>
+    <div class="col-sm-4">
+      <input name="reconstructions" class="form-control" size="4" type="text" placeholder="20">
+      <p class="help-block">The number of reconstructions to run (default 20)</p>
+    </div>
+  </div>
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Enantiomer Selection: </label>
+    <div class="col-sm-1 checkbox">
+      <label>
+        <input type="checkbox" name="enantiomer" value="1"> 
+      </label>
+    </div>
+  </div>
 {{ with .captchaID }}
   <div class="form-group">
     <label class="col-sm-2 control-label">&nbsp;</label>

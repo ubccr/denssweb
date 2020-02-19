@@ -20,6 +20,7 @@ package model
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -36,8 +37,36 @@ const (
 	StatusError           // 4
 )
 
+type ExtraParams struct {
+	// Reconstructions
+	Reconstructions int64 `db:"-" json:"reconstructions" valid:"-" schema:"reconstructions"`
+
+	// Symmetry
+	Symmetry int64 `db:"-" json:"ncs" valid:"-" schema:"ncs"`
+
+	// Symmetry Axis
+	SymmetryAxis int64 `db:"-" json:"ncs_axis" valid:"-" schema:"ncs_axis"`
+
+	// Symmetry Steps
+	SymmetrySteps string `db:"-" json:"ncs_steps" valid:"-" schema:"ncs_steps"`
+
+	// Fit experimental data
+	Fit bool `db:"-" json:"fit" valid:"-" schema:"fit"`
+
+	// Enantiomer
+	Enantiomer bool `db:"-" json:"enantiomer" valid:"-" schema:"enantiomer"`
+
+	// Mode
+	Mode string `db:"-" json:"mode" valid:"-" schema:"mode"`
+
+	// Method
+	Method string `db:"-" json:"-" valid:"-" schema:"method"`
+}
+
 // A DENSS Job
 type Job struct {
+    ExtraParams
+
 	// Unique ID for the Job
 	ID int64 `db:"id" json:"id" valid:"-" schema:"-"`
 
@@ -109,6 +138,9 @@ type Job struct {
 	// Maximum number of times to run DENSS
 	MaxRuns int64 `db:"max_runs" json:"-" valid:"range(2|100)~Max Runs should be between 2 and 100" schema:"max_runs"`
 
+	// Params hack
+	Params string `db:"params" json:"-" valid:"-" schema:"-"`
+
 	// Time the job was submitted
 	Submitted *time.Time `db:"submitted" json:"-" valid:"-" schema:"-"`
 
@@ -120,6 +152,36 @@ type Job struct {
 
 	// Current running/wait time for the job. Only used in json
 	Time string `db:"-" json:"time" valid:"-" schema:"-"`
+}
+
+func (j *Job) MarshallParams() error {
+    params := &ExtraParams{
+        Reconstructions: j.Reconstructions,
+        Symmetry: j.Symmetry,
+        SymmetryAxis: j.SymmetryAxis,
+        SymmetrySteps: j.SymmetrySteps,
+        Fit: j.Fit,
+        Enantiomer: j.Enantiomer,
+        Mode: j.Mode,
+        Method: j.Method,
+    }
+
+    jsonBytes, err := json.Marshal(params)
+    if err != nil {
+        return err
+    }
+
+    j.Params = string(jsonBytes)
+
+    return nil
+}
+
+func (j *Job) UnmarshallParams() error {
+    if j.Params == "" {
+        return nil
+    }
+
+    return json.Unmarshal([]byte(j.Params), j)
 }
 
 func (j *Job) URL() string {
@@ -188,6 +250,7 @@ func FetchJob(db *sqlx.DB, token string) (*Job, error) {
             j.electrons,
             j.max_steps,
             j.max_runs,
+            j.params,
             j.submitted,
             j.started,
             j.completed
@@ -197,6 +260,11 @@ func FetchJob(db *sqlx.DB, token string) (*Job, error) {
 	if err != nil {
 		return nil, err
 	}
+
+    err = job.UnmarshallParams()
+    if err != nil {
+        return nil, err
+    }
 
 	return &job, nil
 }
@@ -232,6 +300,11 @@ func QueueJob(db *sqlx.DB, job *Job) error {
 		job.MaxRuns = 20
 	}
 
+    err = job.MarshallParams()
+    if err != nil {
+        return err
+    }
+
 	res, err := tx.NamedExec(`
         insert into job (
             status_id,
@@ -249,6 +322,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
             electrons,
             max_steps,
             max_runs,
+            params,
             voxel_size,
             submitted
         ) values (
@@ -267,6 +341,7 @@ func QueueJob(db *sqlx.DB, job *Job) error {
             :electrons,
             :max_steps,
             :max_runs,
+            :params,
             :voxel_size,
             :submitted)`, job)
 	if err != nil {
@@ -306,6 +381,7 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
             j.electrons,
             j.max_steps,
             j.max_runs,
+            j.params,
             j.voxel_size,
             j.submitted,
             j.started,
@@ -318,6 +394,11 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
 	if err != nil {
 		return nil, err
 	}
+
+    err = job.UnmarshallParams()
+    if err != nil {
+        return nil, err
+    }
 
 	job.StatusID = StatusRunning
 	job.Status = "Running"
