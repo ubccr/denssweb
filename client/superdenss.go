@@ -54,6 +54,7 @@ func runSuperdenss(log *logrus.Logger, job *model.Job, workDir string, threads i
 		outputPrefix,
 		"-j",
 		fmt.Sprintf("%d", threads),
+		"-p",
 	}
 
 	if job.Enantiomer {
@@ -69,7 +70,8 @@ func runSuperdenss(log *logrus.Logger, job *model.Job, workDir string, threads i
 		"-os",
 		fmt.Sprintf("%.4f", job.Oversampling),
 		"--plot_off",
-		"-mode",
+		"--quiet",
+		"--mode",
 		strings.ToUpper(job.Mode),
 	}
 
@@ -103,7 +105,7 @@ func runSuperdenss(log *logrus.Logger, job *model.Job, workDir string, threads i
 	}
 
 	sargs = append(sargs, "-i")
-	sargs = append(sargs, fmt.Sprintf(`"%s"`, strings.Join(args, " ")))
+	sargs = append(sargs, strings.Join(args, " "))
 
 	log.WithFields(logrus.Fields{
 		"id":      job.ID,
