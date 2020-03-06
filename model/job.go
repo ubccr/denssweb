@@ -57,7 +57,7 @@ type ExtraParams struct {
 	Mode string `db:"-" json:"mode" valid:"-" schema:"mode"`
 
 	// Method
-	Method string `db:"-" json:"-" valid:"-" schema:"method"`
+	Method string `db:"-" json:"method" valid:"-" schema:"method"`
 }
 
 // A DENSS Job

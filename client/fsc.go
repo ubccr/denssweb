@@ -31,7 +31,7 @@ import (
 // Create Fourier Shell Correlation (FSC) curve
 func plotFSC(log *logrus.Logger, job *model.Job, workDir string) error {
 	outputPrefix := fmt.Sprintf("output_%d", job.ID)
-    fscData := filepath.Join(workDir, outputPrefix, "spt_avg_01", "fsc_0.txt")
+	fscData := filepath.Join(workDir, outputPrefix, outputPrefix+"_avg_fsc_avg.txt")
 	fscPNG := filepath.Join(workDir, "fsc.png")
 
 	log.WithFields(logrus.Fields{

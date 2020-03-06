@@ -20,6 +20,7 @@ package client
 import (
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -92,18 +93,50 @@ func processJob(ctx *app.AppContext, job *model.Job, threads int) error {
 
 	log.Out = logFile
 
+	if job.Method == "denss" {
+		logrus.WithFields(logrus.Fields{
+			"id": job.ID,
+		}).Info("Running DENSS All")
+
+		model.LogJobMessage(ctx.DB, job, "Run DENSS All", fmt.Sprintf("Performing %d parallel DENSS runs", job.MaxRuns), 25)
+		err = runDenssAll(log, job, workDir, threads)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error": err.Error(),
+				"id":    job.ID,
+			}).Error("Failed to run denss.all.py")
+			model.LogJobMessage(ctx.DB, job, "Run DENSS All Failed", "Failed to run DENSS All", 0)
+			return err
+		}
+
+	} else {
+		logrus.WithFields(logrus.Fields{
+			"id": job.ID,
+		}).Info("Running Super DENSS")
+
+		model.LogJobMessage(ctx.DB, job, "Run Super DENSS", fmt.Sprintf("Performing %d parallel DENSS runs", job.MaxRuns), 25)
+		err = runSuperdenss(log, job, workDir, threads)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error": err.Error(),
+				"id":    job.ID,
+			}).Error("Failed to run superdenss")
+			model.LogJobMessage(ctx.DB, job, "Run Super DENSS Failed", "Failed to run Super DENSS", 0)
+			return err
+		}
+	}
+
 	logrus.WithFields(logrus.Fields{
 		"id": job.ID,
-	}).Info("Running DENSS")
+	}).Info("Saving MRC file")
 
-	model.LogJobMessage(ctx.DB, job, "Run DENSS", fmt.Sprintf("Performing %d parallel DENSS runs", job.MaxRuns), 25)
-	err = runSuperdenss(log, job, workDir, threads)
+	job.DensityMap, err = ioutil.ReadFile(filepath.Join(workDir, fmt.Sprintf("output_%d", job.ID), fmt.Sprintf("output_%d_avg.mrc", job.ID)))
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err.Error(),
 			"id":    job.ID,
-		}).Error("Failed to run denss")
-		model.LogJobMessage(ctx.DB, job, "Run DENSS Failed", "Failed to run DENSS", 0)
+		}).Error("Failed to read MRC file")
+		model.LogJobMessage(ctx.DB, job, "Reading MRC file failed", "Failed to read MRC file", 0)
 		return err
 	}
 
