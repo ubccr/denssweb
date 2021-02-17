@@ -46,7 +46,7 @@ def summary_plot(work_dir, out_file):
         ax[0].set_title('Statistics by Step')
         x = range(shape[0])
 
-        for i in xrange(n):
+        for i in range(n):
             ax[0].plot(x, data[i,:,0])
             ax[1].plot(x, data[i,:,1])
             ax[2].plot(x, data[i,:,2])

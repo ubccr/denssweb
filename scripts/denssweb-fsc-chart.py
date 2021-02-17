@@ -41,7 +41,7 @@ def fsc_plot(in_file, out_file):
     cutoff = 0.5
 
     logging.info("Estimate resolution")
-    for i in xrange(len(x)-1, 0, -1):
+    for i in range(len(x)-1, 0, -1):
         if y[i] > 0.5:
             resolution = x[i]
             break
