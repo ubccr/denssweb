@@ -62,6 +62,10 @@ func runDenssAll(log *logrus.Logger, job *model.Job, workDir string, threads int
 		strings.ToUpper(job.Mode),
 	}
 
+	if viper.GetBool("enable_gpu") {
+		args = append(args, "--gpu")
+    }
+
 	if !job.Enantiomer {
 		args = append(args, "-en_off")
 	}
@@ -103,7 +107,7 @@ func runDenssAll(log *logrus.Logger, job *model.Job, workDir string, threads int
 	log.WithFields(logrus.Fields{
 		"id":      job.ID,
 		"threads": threads,
-	}).Info("Running superdenss")
+	}).Info("Running denss.all.py")
 
 	cmd := exec.CommandContext(ctx, viper.GetString("denssall_path"), args...)
 	cmd.Dir = workDir
