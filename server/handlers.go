@@ -187,11 +187,6 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		return nil, errors.New("Please provide an input data file")
 	}
 
-	dmax, err := parseFloat(r.FormValue("dmax"), "Dmax")
-	if err != nil {
-		return nil, err
-	}
-
 	fileType := "out"
 	if version, err := parseGNOMHeader(data); err == nil {
 		log.WithFields(log.Fields{
@@ -204,11 +199,6 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 			return nil, err
 		}
 		log.Info("Input data appears to be 3-column DAT file")
-
-		// DAT files require Dmax
-		if dmax == 0.0 {
-			return nil, errors.New("Please provide a float for the maximum particle dimension")
-		}
 
 		fileType = "dat"
 	}
@@ -230,7 +220,7 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 
 	job := &model.Job{InputData: data, FileType: fileType}
 
-	err = ctx.Decoder.Decode(job, r.PostForm)
+	err := ctx.Decoder.Decode(job, r.PostForm)
 	if err != nil {
 		switch serr := err.(type) {
 		case schema.ConversionError:
@@ -292,9 +282,6 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	if !valid.Matches(job.Mode, "(fast|slow|membrane)") {
 		return nil, errors.New("Job mode should be one of fast, slow, or membrane")
 	}
-	if !valid.Matches(job.Method, "(denss|eman2)") {
-		return nil, errors.New("Averaging method should be one of denss or eman2")
-	}
 	if job.SymmetryAxis > 0 && !valid.InRangeInt(job.Symmetry, 0, 4) {
 		return nil, errors.New("Symmetry should be 1, 2 or 3")
 	}
@@ -314,6 +301,7 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		job.MaxRuns = 20
 		job.VoxelSize = 0
 	}
+    job.Method = "denss"
 
 	err = model.QueueJob(ctx.DB, job)
 	if err != nil {
