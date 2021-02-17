@@ -54,8 +54,6 @@ func runDenssAll(log *logrus.Logger, job *model.Job, workDir string, threads int
 		outputPrefix,
 		"-j",
 		fmt.Sprintf("%d", threads),
-		"-os",
-		fmt.Sprintf("%.4f", job.Oversampling),
 		"--plot_off",
 		"--quiet",
 		"--mode",
@@ -70,26 +68,13 @@ func runDenssAll(log *logrus.Logger, job *model.Job, workDir string, threads int
 		args = append(args, "-en_off")
 	}
 
-	if job.MaxRuns > 0 {
-		args = append(args, "-n")
-		args = append(args, fmt.Sprintf("%d", job.MaxRuns))
-	}
-
 	if job.Dmax > 0 {
 		args = append(args, "-d")
 		args = append(args, fmt.Sprintf("%.4f", job.Dmax))
 	}
-	if job.VoxelSize > 0 {
-		args = append(args, "-v")
-		args = append(args, fmt.Sprintf("%.4f", job.VoxelSize))
-	}
 	if job.Electrons > 0 {
 		args = append(args, "--ne")
 		args = append(args, fmt.Sprintf("%d", job.Electrons))
-	}
-	if job.NumSamples > 0 {
-		args = append(args, "-n")
-		args = append(args, fmt.Sprintf("%d", job.NumSamples))
 	}
 	if job.Symmetry > 0 {
 		args = append(args, "-ncs")

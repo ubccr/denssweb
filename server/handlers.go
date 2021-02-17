@@ -258,23 +258,8 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	// Validate parameters to sane default ranges
 	// *Note* range validator tag is not currently working.
 	// See: https://github.com/asaskevich/govalidator/issues/223
-	if job.Dmax > 0 && !valid.InRangeFloat64(job.Dmax, 10, 1000) {
-		return nil, errors.New("Dmax should be between 10 and 1000")
-	}
-	if job.MaxSteps > 0 && !valid.InRangeInt(job.MaxSteps, 100, 10000) {
-		return nil, errors.New("Max Steps should be between 10 and 10000")
-	}
-	if job.NumSamples > 0 && !valid.InRangeInt(job.NumSamples, 2, 500) {
-		return nil, errors.New("Num Samples should be between 2 and 500")
-	}
-	if job.Oversampling > 0 && !valid.InRangeFloat64(job.Oversampling, 2, 50) {
-		return nil, errors.New("Oversampling should be between 2 and 50")
-	}
-	if job.MaxRuns > 0 && !valid.InRangeInt(job.MaxRuns, 0, 21) {
-		return nil, errors.New("Number of Reconstructions should be between 0 and 20")
-	}
-	if job.VoxelSize > 0 && !valid.InRangeFloat64(job.VoxelSize, 1, 100) {
-		return nil, errors.New("Voxel Size should be between 1 and 100")
+	if job.Dmax > 0 && !valid.InRangeFloat64(job.Dmax, 1, 100000000) {
+		return nil, errors.New("Dmax should be between 1 and 100000000")
 	}
 	if job.Electrons > 0 && !valid.InRangeInt(job.Electrons, 1, 100000000) {
 		return nil, errors.New("Electrons should be between 1 and 1e8")
@@ -282,7 +267,10 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	if !valid.Matches(job.Mode, "(fast|slow|membrane)") {
 		return nil, errors.New("Job mode should be one of fast, slow, or membrane")
 	}
-	if job.SymmetryAxis > 0 && !valid.InRangeInt(job.Symmetry, 0, 4) {
+	if job.Symmetry > 0 && !valid.InRangeInt(job.Symmetry, 0, 500) {
+		return nil, errors.New("Symmetry should less than 500")
+	}
+	if job.SymmetryAxis > 0 && !valid.InRangeInt(job.SymmetryAxis, 0, 4) {
 		return nil, errors.New("Symmetry should be 1, 2 or 3")
 	}
 	if job.SymmetrySteps != "" {
@@ -295,12 +283,6 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		}
 	}
 
-	if viper.GetBool("restrict_params") {
-		// Force setting default parameters
-		job.MaxSteps = 3000
-		job.MaxRuns = 20
-		job.VoxelSize = 0
-	}
     job.Method = "denss"
 
 	err = model.QueueJob(ctx.DB, job)

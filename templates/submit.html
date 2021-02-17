@@ -29,6 +29,12 @@
       <p class="help-block">Must be alphanumeric and less than 255 characters</p>
     </div>
   </div>
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Estimated maximum dimension</label>
+    <div class="col-sm-2">
+      <input name="dmax" class="form-control" size="4" type="text">
+    </div>
+  </div>
 {{ if .emailEnabled }}
   <div class="form-group">
     <label  class="col-sm-3 control-label">Email</label>
@@ -38,12 +44,6 @@
     </div>
   </div>
 {{ end }}
-  <div class="form-group">
-    <label class="col-sm-2 control-label">&nbsp;</label>
-    <div class="col-sm-6">
-        <h2>DENSS Reconstructions</h2>
-    </div>
-  </div>
   <div class="form-group">
     <label  class="col-sm-3 control-label">Mode: </label>
     <div class="col-sm-1 radio">
@@ -60,20 +60,6 @@
       <label>
         <input type="radio" name="mode" value="membrane"> Membrane
       </label>
-    </div>
-  </div>
-  <div class="form-group">
-    <label  class="col-sm-3 control-label">Samples</label>
-    <div class="col-sm-4">
-      <input name="num_samples" class="form-control" size="4" type="text" placeholder="64">
-      <p class="help-block">Number of samples, i.e. grid points, along a single dimension. (Sets voxel size, overridden by Voxel Size. Best optimization with n=power of 2)</p>
-    </div>
-  </div>
-  <div class="form-group">
-    <label  class="col-sm-3 control-label">Oversampling</label>
-    <div class="col-sm-4">
-      <input name="oversampling" class="form-control" size="4" type="text" placeholder="3.0">
-      <p class="help-block">Sampling ratio</p>
     </div>
   </div>
   <div class="form-group">
@@ -109,30 +95,10 @@
     </div>
   </div>
   <div class="form-group">
-    <label  class="col-sm-3 control-label">Voxel Size</label>
-    <div class="col-sm-4">
-      <input name="voxel_size" class="form-control" size="4" type="text">
-      <p class="help-block">Set desired voxel size, setting resolution of map</p>
-    </div>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-2 control-label">&nbsp;</label>
-    <div class="col-sm-6">
-        <h2>Averaging Procedure</h2>
-    </div>
-  </div>
-  <div class="form-group">
-    <label  class="col-sm-3 control-label">Reconstructions</label>
-    <div class="col-sm-4">
-      <input name="max_runs" class="form-control" size="4" type="text" placeholder="20">
-      <p class="help-block">The number of reconstructions to run (default 20)</p>
-    </div>
-  </div>
-  <div class="form-group">
     <label  class="col-sm-3 control-label">Enantiomer Selection: </label>
     <div class="col-sm-1 checkbox">
       <label>
-        <input type="checkbox" name="enantiomer" value="1"> 
+        <input type="checkbox" name="enantiomer" checked="checked" value="1"> 
       </label>
     </div>
   </div>

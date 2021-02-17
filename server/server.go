@@ -82,7 +82,7 @@ func RunServer(ctx *app.AppContext) {
 
 	srv := &http.Server{
 		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
+		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  120 * time.Second,
 		Addr:         fmt.Sprintf("%s:%d", viper.GetString("bind"), viper.GetInt("port")),
 		Handler:      mw,

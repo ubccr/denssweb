@@ -118,22 +118,22 @@ type Job struct {
 	// More samples means greater resolution. This is calculated by DENSS, it's
 	// not given to DENSS but we want to control the speed of calcuation so we
 	// use this parameter to determine the voxel size.
-	NumSamples int64 `db:"num_samples" json:"-" valid:"range(2|500)~Number of samples should be between 2 and 500" schema:"num_samples"`
+	NumSamples int64 `db:"num_samples" json:"-" valid:"range(2|500)~Number of samples should be between 2 and 500" schema:"-"`
 
 	// Oversampling size
-	Oversampling float64 `db:"oversampling" json:"-" valid:"range(2|50)~Oversampling should be between 2 and 50" schema:"oversampling"`
+	Oversampling float64 `db:"oversampling" json:"-" valid:"range(2|50)~Oversampling should be between 2 and 50" schema:"-"`
 
 	// Voxel Size
-	VoxelSize float64 `db:"voxel_size" json:"-" valid:"range(1.0|100.0)~Voxel Size should be between 1 and 100" schema:"voxel_size"`
+	VoxelSize float64 `db:"voxel_size" json:"-" valid:"range(1.0|100.0)~Voxel Size should be between 1 and 100" schema:"-"`
 
 	// Number of electrons
 	Electrons int64 `db:"electrons" json:"-" valid:"range(1|100000000)~Electrons should be between 1 and 1e8" schema:"electrons"`
 
 	// Maximum number of steps
-	MaxSteps int64 `db:"max_steps" json:"-" valid:"range(100|10000)~Max Steps should be between 100 and 10000" schema:"max_steps"`
+	MaxSteps int64 `db:"max_steps" json:"-" valid:"range(100|10000)~Max Steps should be between 100 and 10000" schema:"-"`
 
 	// Maximum number of times to run DENSS
-	MaxRuns int64 `db:"max_runs" json:"-" valid:"range(2|100)~Max Runs should be between 2 and 100" schema:"max_runs"`
+	MaxRuns int64 `db:"max_runs" json:"-" valid:"range(2|100)~Max Runs should be between 2 and 100" schema:"-"`
 
 	// Params hack
 	Params string `db:"params" json:"-" valid:"-" schema:"-"`
