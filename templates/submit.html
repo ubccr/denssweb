@@ -29,18 +29,6 @@
       <p class="help-block">Must be alphanumeric and less than 255 characters</p>
     </div>
   </div>
-  <div class="form-group">
-    <label  class="col-sm-3 control-label">Estimated maximum dimension</label>
-    <div class="col-sm-2">
-      <input name="dmax" class="form-control" size="4" type="text">
-      <p class="help-block">* Required for DAT files</p>
-    </div>
-    <div class="col-sm-2 checkbox">
-      <label>
-        <input type="checkbox" name="fit" value="1"> Fit Experimental Data
-      </label>
-    </div>
-  </div>
 {{ if .emailEnabled }}
   <div class="form-group">
     <label  class="col-sm-3 control-label">Email</label>
@@ -89,13 +77,6 @@
     </div>
   </div>
   <div class="form-group">
-    <label  class="col-sm-3 control-label">Electrons</label>
-    <div class="col-sm-4">
-      <input name="electrons" class="form-control" size="4" type="text" placeholder="10000">
-      <p class="help-block">Number of electrons in object</p>
-    </div>
-  </div>
-  <div class="form-group">
     <label  class="col-sm-3 control-label">Symmetry (N-Fold)</label>
     <div class="col-sm-4">
       <input name="ncs" class="form-control" size="4" type="text" placeholder="">
@@ -138,19 +119,6 @@
     <label class="col-sm-2 control-label">&nbsp;</label>
     <div class="col-sm-6">
         <h2>Averaging Procedure</h2>
-    </div>
-  </div>
-  <div class="form-group">
-    <label  class="col-sm-3 control-label">Method: </label>
-    <div class="col-sm-1 radio">
-      <label>
-        <input type="radio" name="method" value="denss"> DENSS
-      </label>
-    </div>
-    <div class="col-sm-1 radio">
-      <label>
-        <input type="radio" name="method" value="eman2" checked="checked"> EMAN2
-      </label>
     </div>
   </div>
   <div class="form-group">
