@@ -35,6 +35,19 @@
       <input name="dmax" class="form-control" size="4" type="text">
     </div>
   </div>
+  <div class="form-group">
+    <label  class="col-sm-3 control-label">Angular units: </label>
+    <div class="col-sm-1 radio">
+      <label>
+        <input type="radio" name="units" value="a" checked="checked"> angstrom
+      </label>
+    </div>
+    <div class="col-sm-1 radio">
+      <label>
+        <input type="radio" name="units" value="nm"> nanometer
+      </label>
+    </div>
+  </div>
 {{ if .emailEnabled }}
   <div class="form-group">
     <label  class="col-sm-3 control-label">Email</label>

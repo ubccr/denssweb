@@ -62,7 +62,12 @@ func runDenssAll(log *logrus.Logger, job *model.Job, workDir string, threads int
 
 	if viper.GetBool("enable_gpu") {
 		args = append(args, "--gpu")
-    }
+	}
+
+	if job.Units != "" {
+		args = append(args, "--units")
+		args = append(args, job.Units)
+	}
 
 	if !job.Enantiomer {
 		args = append(args, "-en_off")

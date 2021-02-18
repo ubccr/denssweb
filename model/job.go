@@ -56,6 +56,9 @@ type ExtraParams struct {
 	// Mode
 	Mode string `db:"-" json:"mode" valid:"-" schema:"mode"`
 
+	// Units
+	Units string `db:"-" json:"units" valid:"-" schema:"units"`
+
 	// Method
 	Method string `db:"-" json:"method" valid:"-" schema:"-"`
 }
@@ -159,6 +162,7 @@ func (j *Job) MarshallParams() error {
 		Fit:           j.Fit,
 		Enantiomer:    j.Enantiomer,
 		Mode:          j.Mode,
+		Units:         j.Units,
 		Method:        j.Method,
 	}
 

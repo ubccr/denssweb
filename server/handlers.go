@@ -267,6 +267,9 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 	if !valid.Matches(job.Mode, "(fast|slow|membrane)") {
 		return nil, errors.New("Job mode should be one of fast, slow, or membrane")
 	}
+	if !valid.Matches(job.Units, "(a|nm)") {
+		return nil, errors.New("Angular units should be a or nm")
+	}
 	if job.Symmetry > 0 && !valid.InRangeInt(job.Symmetry, 0, 500) {
 		return nil, errors.New("Symmetry should less than 500")
 	}
@@ -283,7 +286,7 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 		}
 	}
 
-    job.Method = "denss"
+	job.Method = "denss"
 
 	err = model.QueueJob(ctx.DB, job)
 	if err != nil {
