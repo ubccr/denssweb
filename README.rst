@@ -2,12 +2,12 @@
 DENSSWeb - Web frontend to DENSS
 ===============================================================================
 
-DENSSWeb is a web frontend for the `DENSS algorithm <https://github.com/tdgrant1/denss>`_.
-DENsity from Solution Scattering (DENSS) is an algorithm used for calculating
-ab initio electron density maps directly from solution scattering data.
-DENSSWeb provides a web based frontend interface allowing users to run complex
-DENSS pipelines and view results in a browser. DENSSWeb performs parallel DENSS
-runs and averages the results using EMAN2. The resulting density map is
+DENSSWeb is a web frontend for the `DENSS algorithm
+<https://github.com/tdgrant1/denss>`_.  DENsity from Solution Scattering
+(DENSS) is an algorithm used for calculating ab initio electron density maps
+directly from solution scattering data.  DENSSWeb provides a web based frontend
+interface allowing users to run complex DENSS pipelines and view results in a
+browser. DENSSWeb performs parallel DENSS runs and the resulting density map is
 displayed using a custom LiteMol plugin along with a plot of the fourier shell
 correlation (FSC) curve.
 
@@ -95,7 +95,6 @@ DENSSWeb requires the following software
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * `DENSS <https://github.com/tdgrant1/denss>`_
-* `EMAN2 <https://github.com/cryoem/eman2>`_
 
 The following guide assumes you're running Linux Ubuntu 18.04. You will need to
 adjust package names for your distro.
@@ -116,11 +115,6 @@ Clone and install DENSS::
     $ git clone https://github.com/tdgrant1/denss
     $ cd denss
     $ python setup.py install
-
-Installing EMAN2
-~~~~~~~~~~~~~~~~~
-
-See `here <https://blake.bcm.edu/emanwiki/EMAN2/Install>`_ for instructions on installing EMAN2. 
 
 ------------------------------------------------------------------------
 License
