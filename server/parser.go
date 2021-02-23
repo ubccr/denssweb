@@ -36,20 +36,22 @@ var (
 	GNOMScatteringHeaderPattern = regexp.MustCompile(`^\s*S\s+J EXP\s+ERROR\s+J REG\s+I REG`)
 )
 
-// Validate simple 3-column ascii text file. First column is q, second column
-// is intensity, third column is error.
-func validateDAT(data []byte) error {
+// Validate data of fit file. First column is q, second column is intensity,
+// third column is error, fourth column is fit. Returns number of columns or
+// error
+func validateDAT(data []byte) (int, error) {
 	contentType := http.DetectContentType(data)
 	if !strings.HasPrefix(contentType, "text/plain") {
 		log.WithFields(log.Fields{
 			"contentType": contentType,
 		}).Error("Invalid input file uploaded")
-		return fmt.Errorf("Invalid input data. Please provide an ascii text file")
+		return 0, fmt.Errorf("Invalid input data. Please provide an ascii text file")
 	}
 
 	reader := bytes.NewReader(data)
 	scanner := bufio.NewScanner(reader)
 	lineno := 0
+	cols := 0
 	isEmpty := true
 	for scanner.Scan() {
 		lineno++
@@ -59,24 +61,29 @@ func validateDAT(data []byte) error {
 			// skip blank lines
 			continue
 		}
-		parts := strings.Fields(line)
-		if len(parts) != 3 {
-			return fmt.Errorf("Input data format must be 3 columns: error on line %d", lineno)
+		if strings.HasPrefix(line, "#") {
+			// skip comments
+			continue
 		}
+		parts := strings.Fields(line)
 		for _, n := range parts {
 			_, err := strconv.ParseFloat(n, 64)
 			if err != nil {
-				return fmt.Errorf("Invalid floating point numbers found on line %d", lineno)
+				return 0, fmt.Errorf("Invalid floating point numbers found on line %d", lineno)
 			}
 			isEmpty = false
+		}
+
+		if len(parts) > 0 {
+			cols = len(parts)
 		}
 	}
 
 	if isEmpty {
-		return errors.New("Input data file was empty")
+		return 0, errors.New("Input data file was empty")
 	}
 
-	return nil
+	return cols, nil
 }
 
 // Check if input data has GNOM header and return version

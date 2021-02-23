@@ -193,14 +193,18 @@ func submitJob(ctx *app.AppContext, data []byte, r *http.Request) (*model.Job, e
 			"version": version,
 		}).Info("Input data appears to be GNOM")
 	} else {
-		// Check 3-column DAT file
-		err := validateDAT(data)
+		// Check N-column DAT file
+		cols, err := validateDAT(data)
 		if err != nil {
 			return nil, err
 		}
-		log.Info("Input data appears to be 3-column DAT file")
+		log.Infof("Input data appears to be %d-column DAT file", cols)
 
-		fileType = "dat"
+		if cols == 4 {
+			fileType = "fit"
+		} else {
+			fileType = "dat"
+		}
 	}
 
 	captchaID := r.FormValue("captcha_id")
