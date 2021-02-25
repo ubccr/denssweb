@@ -393,7 +393,8 @@ func FetchNextPending(db *sqlx.DB) (*Job, error) {
         join job_status s on s.id = j.status_id
         where j.status_id = ?
         order by j.submitted asc
-        limit 1`, StatusPending)
+        limit 1
+        for update`, StatusPending)
 	if err != nil {
 		return nil, err
 	}
