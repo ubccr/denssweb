@@ -199,11 +199,11 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 			"url": job.URL(),
 		}).Info("Processing new job")
 
+		workDir := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss%d-%s", job.ID, job.Name))
+
 		err = processJob(ctx, job, maxThreads)
 		if err != nil {
 			// create zip of logs if job failed
-			workDir := filepath.Join(viper.GetString("work_dir"), fmt.Sprintf("denss%d-%s", job.ID, job.Name))
-
 			logrus.WithFields(logrus.Fields{
 				"id": job.ID,
 			}).Info("Creating zip archive for failed job")
@@ -229,6 +229,16 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 				"url":   job.URL(),
 				"id":    job.ID,
 			}).Error("Failed to process job")
+
+			err = os.RemoveAll(workDir)
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"error":   err.Error(),
+					"url":     job.URL(),
+					"id":      job.ID,
+					"workDir": workDir,
+				}).Error("Failed to clean up work dir")
+			}
 
 			if len(job.Email) > 0 {
 				err = ctx.SendEmail(job.Email, "FAILED", job.URL(), job.ID)
@@ -273,5 +283,15 @@ func RunClient(ctx *app.AppContext, maxThreads int) {
 			"id":  job.ID,
 			"url": job.URL(),
 		}).Info("Job processed succesfully")
+
+		err = os.RemoveAll(workDir)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error":   err.Error(),
+				"url":     job.URL(),
+				"id":      job.ID,
+				"workDir": workDir,
+			}).Error("Failed to clean up work dir")
+		}
 	}
 }
