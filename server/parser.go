@@ -53,6 +53,8 @@ func validateDAT(data []byte) (int, error) {
 	lineno := 0
 	cols := 0
 	isEmpty := true
+	// Skip first line
+	scanner.Scan()
 	for scanner.Scan() {
 		lineno++
 		line := scanner.Text()
