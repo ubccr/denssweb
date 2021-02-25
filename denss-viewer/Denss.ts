@@ -59,7 +59,7 @@ namespace LiteMol.Denss {
             let surface = plugin.context.select('denss-s'+i)[0] as Bootstrap.Entity.Density.Visual;
             let sstyle = Bootstrap.Visualization.Density.Style.create({
                     isoValue: scale[i-1]*maxSigma,
-                    isoValueType: Bootstrap.Visualization.Density.IsoValueType.Sigma,
+                    isoValueType: Bootstrap.Visualization.Density.IsoValueType.Absolute,
                     color: LiteMol.Visualization.Color.fromHex(colors[i-1]), 
                     isWireframe: false,
                     transparency: { alpha: alpha[i-1]}
