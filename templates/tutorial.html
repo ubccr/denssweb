@@ -3,103 +3,200 @@
     <h1>Tutorial</h1>
 </div>
 
+<h2>Overview</h2>
 <ul>
 <li>
-DENSSWeb runs a front end interface to DENSS and uses EMAN2 to perform
-alignment and averaging of 20 independent reconstructions.
-</li>
-
-<li>
-DENSS works best with a smooth fit to the SAXS profile instead of using the raw
-data. To get a smooth fit, use an <a
-href="https://en.wikipedia.org/wiki/Indirect_Fourier_transform">indirect
-Fourier transform</a> algorithm such as <a
-href="https://www.embl-hamburg.de/biosaxs/gnom.html">GNOM</a>. These methods
-take advantage of the oversampling provided by solution scattering experiments.
-</li>
-
-<li>
-The input for DENSS is either the GNOM .out file or a 3 column ASCII text
-file where the columns are q, Intensity, error. Make sure there’s no zeros
-anywhere in the file (including the errors columns and first few rows of
-the file, which sometimes are zeros due to the beamstop).
-</li>
-
-<li>
-Each job submitted to DENSSWeb will be given a unique ID code. However, the
-Job Name field can be used for giving your job a more descriptive name.
-This field can only contain letters, numbers, dashes (-) and underscores
-(_) (no spaces or special characters allowed).
-</li>
-
-<li>
-If using a standard .dat file (3-column ASCII text), you must also enter
-the estimated maximum dimension of the particle (this partly defines the
-size of the box containing the particle). When using a GNOM file, the
-estimated maximum dimension (Dmax) is taken directly from the .out file and
-does not need to be entered in the input field. However, you may enter a
-different Dmax than in the .out file if you like.
-</li>
-
-<li>
-To keep DENSSWeb running efficiently and allowing multiple users to use the
-server, DENSSWeb always sets the number of samples, N, to be 32 and does
-not allow the user to change this (computation scales as N^3).
-</li>
-
-<li>
-While N is set to 32, one can change the oversampling from the default of
-3.0. The real space voxel size will adjust to ensure N=32. Oversampling as
-low as 2 can work in some simple cases. However, for complex cases larger
-oversampling (say 5), may be needed to ensure that the calculated
-scattering matches the data. If the fits look poor (*_fit.png or
-*_map.fit), increase oversampling to try and improve the number of grid
-points that get scaled in reciprocal space. Note that this will increase
-the real space voxel size, lowering resolution. However, in most cases the
-reconstructions do not support such high resolutions, so it shouldn’t be a
-problem. To see if it may be a problem, check out the FSC curve in the
-folder spt_01/fsc_0.txt, if FSC falls below 0.5 before the end of the
-x-axis, you’re unlikely to gain resolution by decreasing the voxel size
-anyways. If you want to increase the oversampling *and* decrease the voxel
-size (thus requiring N&gt;32), you must download DENSS and EMAN2 and run
-things yourself. This is made simpler with the superdenss bash script
-available on the DENSS github page <a href="https://github.com/tdgrant1/denss">here</a>.
-</li>
-
-<li>
-If you'd like to set the actual number of electrons in the map to be
-something you know, for example from the molecular weight of the particle,
-enter the number of electrons in the Electrons input. This simply scales
-the density of the final map such that the total number of electrons
-matches the input value.
-</li>
-
-<li>
-Enter the reCaptcha number to ensure you're not a robot and click Submit.
-</li>
-
-<li>
-Typical times are about 5 minutes per job.
-</li>
-
-<li>
-When complete, the browser will display an embedded LiteMol window showing
-the electron density map. This display is interactive, including changing
-the isolevels (click the tools icon in the LiteMol window).
-</li>
-
-<li>
-Below the interactive density display is a plot of the Fourier Shell
-Correlation as a function of resolution. The estimated resolution of the
-averaged reconstruction is given by where the FSC falls below 0.5, and that
-value is displayed on the plot.
-</li>
-
-<li>
-Below the FSC curve is a series of three plots showing various statistics
-(chi^2, Rg, Support Volume) as a function of step number. Plots for all 20
-reconstructions are shown.
+DENSSWeb runs a front-end interface to DENSS (specifically the denss.all.py
+script, currently version 1.6.2) to reconstruct 20 electron density maps from a
+1D solution scattering profile (X-ray or neutron, i.e., SAXS or SANS), and
+perform alignment and averaging of the reconstructions.
 </li>
 </ul>
 
+<h2>Input</h2>
+<ul>
+<li>
+
+DENSS requires a smooth fit to the SAXS/SANS profile instead of using the raw
+data. To get a smooth fit, you can use an <a
+href="https://en.wikipedia.org/wiki/Indirect_Fourier_transform">indirect Fourier transform</a> algorithm such as 
+<a href="https://www.embl-hamburg.de/biosaxs/gnom.html">GNOM</a> or
+denss.fit_data.py to calculate this fit yourself.  Alternatively, DENSS can
+take raw data and automatically fit a smooth profile to it, estimating the
+maximum dimension (Dmax) in the process.
+</li>
+
+<li>
+DENSSWeb can take multiple file types as inputs as follows:
+    <ul>
+        <li>A 3-column ASCII text ".dat" file (columns are q, intensity, error)
+       containing the raw data. In this case DENSS will estimate Dmax and fit a
+       smooth curve to the noisy data and use this fit for the reconstruction. 
+        </li>
+        <li>A 3-column ASCII text ".dat" file (columns are q, intensity, error) containing
+            a smooth curve that has already been fitted to the raw data. In this case DENSS
+            will estimate Dmax but will not fit a smooth curve to the data, instead using
+            the provided curve. DENSS decides if the data are raw or smoothed by checking
+            if the data contain intensity at q=0. If so, then DENSS will assume it is
+            already a smooth curve (since I(q=0) cannot be collected in a real experiment),
+            otherwise DENSS will assume the data are raw data and will fit the data with a
+            smooth curve.
+        </li>
+        <li>A 4-column ASCII text ".fit" file (columns are q, intensity, error, fit)
+        containing both the raw data and a fit to the raw data. DENSS will use the fit
+        to the data for the reconstructions. If the header contains a header line with
+        "# Dmax = &lt;maximum dimension value&gt;", which is the format of output .fit files
+        from denss.fit_data.py, then DENSS will use that Dmax value. If that header
+        line is not in the file, DENSS will estimate Dmax automatically.
+        </li>
+        <li>A GNOM .out file from the ATSAS package. DENSS will use the fit to the data in
+            the file for the reconstructions and will use the Dmax in the file also.
+        </li>
+    </ul>
+</li>
+</ul>
+
+<h2>Job Name and Parameter Options</h2>
+<ul>
+<li>
+Each job submitted to DENSSWeb will be given a unique ID code. However, the Job
+Name field can be used for giving your job a more descriptive name. This field
+can only contain letters, numbers, dashes (-) and underscores (_) (no spaces or
+special characters allowed).
+</li>
+<li>
+By default, DENSS will use either the extracted Dmax from the input file or
+will estimate the Dmax automatically otherwise. Any value entered into the
+"Estimated maximum dimension" field will override the extracted/estimated Dmax
+value and will be used for reconstructions.
+</li>
+<li>
+By default, DENSS assumes q values are given in inverse angstroms (Å-1), where
+q = 4π*sinθ/λ (2θ is the scattering angle and λ is the wavelength of the
+incident beam). The "Angular units" option can be used to change the units from
+inverse angstroms to inverse nanometers.
+</li>
+<li>
+The "Mode" option will run DENSS in either Fast, Slow, or Membrane mode. By
+default, DENSS will run in Slow mode, which should be good enough for the
+majority of cases to get reliable reconstructions. Slow mode will take around
+25-30 minutes once it begins. Alternatively, a quick reconstruction can be run
+by selecting Fast mode, which will take around 5-10 minutes. Fast mode sets the
+number of samples to 32 (compared to the default for Slow mode of 64), and will
+thus possibly/likely result in lower resolution, but can often give a good
+enough idea of the results. If you have a particle that has significant
+negative contrast (such as a membrane protein in a micelle), then selecting the
+Membrane mode will remove the positivity restraint in DENSS and allow for
+negative contrast. Note that while this is called "Membrane" mode, it can be
+used for virtually any particle, including things such as empty micelles or
+nanoparticles that may have negative contrast or even standard proteins that do
+not exhibit significant negative contrast. However, by removing the positivity
+restraint, sometimes the resulting reconstructions are a bit noisier, but often
+not significantly so.
+</li>
+
+</ul>
+
+<h2>Symmetry</h2>
+<ul>
+<li>If the particle has symmetry, the reconstructions can be significantly
+improved by enforcing N-fold symmetry about an axis, i.e., by performing
+symmetry averaging (similar to non-crystallographic symmetry averaging for
+those familiar with crystallography). For example, to apply 3-fold symmetry
+with a trimer, enter "3" in the "Symmetry (N-fold)" field. No symmetry will be
+applied if this field is left blank.</li>
+<li>Sometimes the longest principal axis of a particle is the axis of symmetry,
+while other times the shortest axis is the axis of symmetry. There is no way to
+determine this directly from the scattering data and this information must be
+given to DENSS. By default, DENSS will select the longest axis as the axis of
+symmetry. Use the "Symmetry Axis" option to select a different axis of
+symmetry.</li>
+<li>The "Symmetry Steps" field will accept a space separated list of steps
+indicating when to apply symmetry. Usually using symmetry at just a handful of
+steps, say 3 or 4 times throughout the reconstruction, is plenty to bias the
+reconstruction towards a symmetric particle. Entering too many steps, or
+applying symmetry too early in the reconstruction (e.g., &lt;1000 steps) may
+result in artifacts in the density, such as streaks of density appearing caused
+by the repeated interpolation required to apply symmetry averaging. The default
+number of steps is given in the input field "3000 5000 7000 9000", however this
+can be changed by entering a different sequence of steps as a space separated
+list.</li>
+</ul>
+
+<h2>Enantiomer Selection</h2>
+<ul>
+<li>By default, "Enantiomer Selection" is enabled, and this option should
+almost always stay checked. However, this option does add a few minutes to the
+reconstruction, so may be disabled if desired by unchecking the box.</li>
+</ul>
+
+<h2>Submission</h2>
+<ul>
+    <li>Enter the reCaptcha number to ensure you're not a robot and click Submit.</li>
+    <li>After submitting, the browser window will update and show a progress
+    bar to indicate whether the job is running, pending, or if there was an
+    error. Note that while the progress bar may say "25% complete", that really
+    just means the job is running and is not an accurate reflection of the
+    actual progress of the job, which is difficult to predict, and that bar
+    will go from 25% to 100% as soon as the job is done.</li>
+    <li>Run times vary depending on which mode was selected and whether or not
+    Enantiomer Selection was enabled. Also, sometimes the reconstructions just
+    converge faster based on the initial random seed (there is a maximum number
+    of steps, ~10,000, that will stop the reconstruction even if it hasn’t
+    converged, though it pretty much always has converged by then anyways). 
+    <ul>
+        <li>The default Slow mode will usually take ~30 minutes with Enantiomer
+        Selection enabled and about 20-25 minutes with it disabled.</li> 
+        <li>Fast mode will take ~10 minutes with Enantiomer Selection, and ~6 minutes with it disabled.</li> 
+        <li>Membrane mode will run similarly to Slow mode.</li>
+        <li>Note that these times are run times and do not include wait times,
+        which may occur if others have submitted jobs and the queue is busy. In
+        that case the progress bar will display "Pending", and when your job
+        begins it will display "Running DENSS All".</li>
+    </ul></li>
+</ul>
+<h2>Results</h2>
+<ul>
+    <li>When complete, the browser will refresh the window showing the results.</li>
+    <li>A unique URL link to the results that can be shared with others will be displayed below the Job Name.</li>
+    <li>Below the link is a button displaying "Download Results". Clicking this
+    link will download the entire results directory including all files as a
+    ZIP file. <strong>We strongly recommend you download the ZIP file immediately.
+    While the results will be kept and accessible as long as possible, we do
+    not guarantee the storage of these results long term.</strong></li>
+    <li>Below that will is an embedded LiteMol window showing the electron
+    density map. This display is interactive and can be rotated, zoomed in, and
+    clipped by using the mouse buttons and scroll wheel. </li>
+    <li>By default, four isocontours are displayed at various sigma values
+    (0.05*, 0.10*, 0.25*, and 0.5*maxSigma). This display is interactive and
+    the isolevels can be changed by clicking the tools icon in the LiteMol
+    window (a little hammer/wrench symbol). Also, the LiteMol panel can be set
+    to fill the browser window by clicking the full screen icon. </li>
+    <li>Below the interactive density display is a plot of the Fourier Shell
+    Correlation as a function of resolution. The estimated resolution of the
+    averaged reconstruction is given by where the FSC falls below 0.5, and that
+    value is displayed on the plot. </li>
+    <li>Below the FSC curve is a series of three plots showing various
+    statistics (chi^2, Rg, Support Volume) as a function of step number. Plots
+    for all 20 reconstructions are shown.</li>
+    <li>All results and plots are stored in the Results ZIP file.</li>
+</ul>
+<h2>More Options and Information</h2>
+<ul>
+   <li>If the options available are not sufficient to meet the needs of your
+   system, and you would like finer control over all the options in DENSS, you
+   will need to download and install DENSS from the <a href="https://github.com/tdgrant1/denss">GitHub page</a>, where virtually all parameters are
+   adjustable. DENSSWeb itself is also <a href="https://github.com/ubccr/denssweb">available on GitHub</a> for those interested
+   </li>
+   <li>Please visit the main <a href="https://www.tdgrant.com/denss">DENSS webpage</a> for further explanations of all
+   options available in DENSS, which includes a
+   full tutorial.</li>
+    <li>If you use DENSSWeb in your research, please cite the original DENSS
+    paper. The manuscript describing DENSSWeb is currently in preparation.</li> 
+    <li>If you have any issues or suggestions or comments, please write to tdgrant at buffalo dot edu.</li>
+</ul>
+
+<br/>
+<br/>
+<br/>
 {{end}}
