@@ -2,9 +2,10 @@
 ChangeLog
 ===============================================================================
 
-`v0.0.2`_ (unreleased)
+`v0.0.2`_ (2021-02-25)
 ---------------------------
 
+* Update for latest denss release
 * Add summary statistics
 * Include entire work dir in zip output
 * Add more optional DENSS parameters 
@@ -12,6 +13,7 @@ ChangeLog
 * Add job list page
 * Add support for parsing GNOM input files
 * Remove Situs dependency
+* Remove EMAN2 dependency
 * Add support for CAPTCHA
 * Add email notifications
 * Add option to disable job list
